@@ -1,4 +1,4 @@
-class Color {
+export default class Color {
     static RED = 'hsl(0, 100%, 50%)';
     static GREEN = 'hsl(120, 100%, 50%)';
     static BLUE = 'hsl(240, 100%, 50%)';

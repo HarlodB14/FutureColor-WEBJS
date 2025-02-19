@@ -2,7 +2,7 @@ import Ingredient from "../Model/Ingredient.js";
 import Structures from "../Enums/Structures.js";
 import MixingHallView from "../View/MixingHallView.js";
 
-class MixingHallController {
+export default class MixingHallController {
     constructor() {
         this.view = new MixingHallView(this);
     }
@@ -25,5 +25,3 @@ class MixingHallController {
         this.view.draw(structures);
     }
 }
-
-export default MixingHallController;

@@ -1,4 +1,4 @@
-class CreateInput {
+export default class CreateInput {
     createInputField(labelText, id, type) {
         const fieldContainer = document.createElement('div');
         const label = document.createElement('label');
@@ -12,6 +12,3 @@ class CreateInput {
         return fieldContainer;
     }
 }
-
-
-export default CreateInput;

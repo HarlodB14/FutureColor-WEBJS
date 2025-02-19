@@ -1,6 +1,6 @@
 import CreateInput from "../Helpers/CreateInput.js";
 
-class MixingHallView {
+export default class MixingHallView {
     constructor(mixingHallController) {
         this.mixingHallController = mixingHallController;
     }
@@ -45,5 +45,3 @@ class MixingHallView {
         form.addEventListener('submit', (e) => this.mixingHallController.handleFormData(e, form));
     }
 }
-
-export default MixingHallView;
