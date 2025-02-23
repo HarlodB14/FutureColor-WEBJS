@@ -7,7 +7,7 @@ export default class MixingHallView {
 
     draw(structures) {
         const container = document.createElement('div');
-        container.className = 'container';
+        container.className = 'formContainer';
         const form = document.createElement('form');
         form.className = 'ingredient-form';
 

@@ -7,6 +7,7 @@ export default class CreateInput {
         const input = document.createElement('input');
         input.type = type;
         input.id = id;
+        input.required = true;
         fieldContainer.appendChild(label);
         fieldContainer.appendChild(input);
         return fieldContainer;
