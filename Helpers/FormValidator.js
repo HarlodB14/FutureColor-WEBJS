@@ -21,8 +21,7 @@ export default class FormValidator {
         let color = values[3].trim();
 
         // Correcte HSL-regex, inclusief flexibele spaties
-        let hslPattern = /^hsl\(\s?(0|[1-9][0-9]?|[1-3][0-5][0-9]|360),\s?(100|[0-9]{1,2})%?,\s?(100|[0-9]{1,2})%?\)$/i;
-
+        let hslPattern = /^hsl\(\s?(0|[1-9][0-9]?|[1-2][0-9][0-9]|3[0-5][0-9]|360),\s?(100|[0-9]{1,2})%?,\s?(100|[0-9]{1,2})%?\)$/i;
         if (!hslPattern.test(color)) {
             validationResult.addError("color", "Kleur moet in HSL-formaat zijn (bijv. hsl(120, 50%, 50%)).");
         }
