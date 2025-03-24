@@ -295,11 +295,11 @@ export default class MixingHallView {
         const spacing = 4;
         const ingredientSize = 30; // Adjust based on your design
 
-        // Calculate required rows
+        // max aantal rijen pakken
         const numRows = Math.ceil(ingredients.length / maxPerRow);
         const potHeight = numRows * (ingredientSize + spacing) + 20; // Adding padding
 
-        // Adjust the pot size dynamically
+        // potgroote dynamisch aanpassen
         Object.assign(potDiv.style, {
             height: `${Math.max(100, potHeight)}px`, // Minimum height of 100px
             display: "flex",
