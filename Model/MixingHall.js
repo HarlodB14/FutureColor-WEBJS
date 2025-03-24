@@ -21,6 +21,14 @@ export default class MixingHall {
     addIngredient(ingredient) {
         this.ingredients.push(ingredient);
     }
+
+    removeIngredient(index) {
+        if (index >= 0 && index < this.ingredients.length) {
+            this.ingredients.splice(index, 1);
+        }
+    }
+
+
     addMixingPot(mixingPot) {
         this.mixingPots.push(mixingPot);
     }

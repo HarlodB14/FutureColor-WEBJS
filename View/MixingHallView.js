@@ -3,6 +3,7 @@ import Structures from "../Enums/Structures.js";
 
 export default class MixingHallView {
     constructor(controller) {
+        this.mixingPotContents = new Map();
         this.controller = controller;
     }
 
@@ -90,6 +91,7 @@ export default class MixingHallView {
             });
 
             potDiv.draggable = true;
+            potDiv.addEventListener('mousedown', this.mouseDown);
             potDiv.setAttribute('data-index', index);
 
             potDiv.addEventListener("dragstart", (e) => this.onDragStart(e));
@@ -101,29 +103,32 @@ export default class MixingHallView {
     }
 
     drawIngredients(ingredients) {
+        let container = document.getElementById("ingredientsContainer");
+
+        if (container) {
+            container.remove();
+        }
+
         let areaContainer = document.getElementById("mixingAreaContainer");
         if (!areaContainer) {
             this.drawMixingPots([]);
             areaContainer = document.getElementById("mixingAreaContainer");
         }
 
-        let container = document.getElementById("ingredientsContainer");
-        if (!container) {
-            container = document.createElement("div");
-            container.id = "ingredientsContainer";
-            areaContainer.appendChild(container);
+        container = document.createElement("div");
+        container.id = "ingredientsContainer";
+        areaContainer.appendChild(container);
 
-            Object.assign(container.style, {
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-                padding: "10px",
-                backgroundColor: "transparent",
-                borderRadius: "10px",
-                boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.1)",
-                maxWidth: "120px",
-            });
-        }
+        Object.assign(container.style, {
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            padding: "10px",
+            backgroundColor: "transparent",
+            borderRadius: "10px",
+            boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.1)",
+            maxWidth: "120px",
+        });
 
         container.innerHTML = ''; // Reset de container
 
@@ -255,7 +260,77 @@ export default class MixingHallView {
     onDrop(e) {
         e.preventDefault();
         const draggedIndex = e.dataTransfer.getData("text");
-        const targetElement = e.target;
+        let targetPot = e.target.closest("[data-index]");
 
+        if (!targetPot) return;
+
+        const targetPotIndex = targetPot.dataset.index;
+        if (!this.mixingPotContents.has(targetPotIndex)) {
+            this.mixingPotContents.set(targetPotIndex, []);
+        }
+        const potContents = this.mixingPotContents.get(targetPotIndex);
+        if (potContents.length >= 8) {
+            return;
+        }
+
+        const ingredient = this.controller.getIngredientByIndex(draggedIndex);
+        if (!ingredient) return;
+
+        potContents.push(ingredient);
+        this.controller.removeIngredient(draggedIndex);
+
+        this.updatePotContents(targetPot, targetPotIndex);
+        this.controller.view.drawIngredients(this.controller.getIngredients());
+    }
+
+
+
+
+
+    updatePotContents(potDiv, potIndex) {
+        potDiv.innerHTML = "";
+
+        const ingredients = this.mixingPotContents.get(potIndex) || [];
+        const maxPerRow = 3;
+        const spacing = 4;
+        const ingredientSize = 30; // Adjust based on your design
+
+        // Calculate required rows
+        const numRows = Math.ceil(ingredients.length / maxPerRow);
+        const potHeight = numRows * (ingredientSize + spacing) + 20; // Adding padding
+
+        // Adjust the pot size dynamically
+        Object.assign(potDiv.style, {
+            height: `${Math.max(100, potHeight)}px`, // Minimum height of 100px
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "flex-end",
+            paddingBottom: "10px",
+            overflow: "hidden",
+        });
+
+        ingredients.forEach((ingredient, index) => {
+            let ingredientDiv = document.createElement("div");
+            let { width, height, borderRadius, boxShadow, animation, innerText } = this.getShapeStyles(ingredient.structure);
+
+            Object.assign(ingredientDiv.style, {
+                width: `${ingredientSize}px`,
+                height: `${ingredientSize}px`,
+                borderRadius,
+                boxShadow,
+                animation,
+                backgroundColor: ingredient.color,
+                margin: `${spacing / 2}px`,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                color: "white",
+                fontSize: "10px",
+            });
+
+            ingredientDiv.innerText = innerText || '';
+            potDiv.appendChild(ingredientDiv);
+        });
     }
 }
