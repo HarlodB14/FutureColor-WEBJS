@@ -72,9 +72,12 @@ export default class MixingHallView {
             });
         }
 
-        container.innerHTML = ''; // Reset de container
-
+        // Do not reset container.innerHTML, instead only add missing pots
         mixingPots.forEach((pot, index) => {
+            if (document.querySelector(`[data-index="${index}"]`)) {
+                return; // Skip existing pots
+            }
+
             let potDiv = document.createElement("div");
 
             Object.assign(potDiv.style, {
@@ -87,18 +90,21 @@ export default class MixingHallView {
                 justifyContent: "center",
                 alignItems: "flex-end",
                 position: "relative",
-                cursor: "move", // Voeg cursor toe voor slepen
+                cursor: "move",
             });
 
             potDiv.draggable = true;
-            potDiv.addEventListener('mousedown', this.mouseDown);
-            potDiv.setAttribute('data-index', index);
+            potDiv.addEventListener("mousedown", this.mouseDown);
+            potDiv.setAttribute("data-index", index);
 
             potDiv.addEventListener("dragstart", (e) => this.onDragStart(e));
             potDiv.addEventListener("dragover", (e) => this.onDragOver(e));
             potDiv.addEventListener("drop", (e) => this.onDrop(e));
 
             container.appendChild(potDiv);
+
+            // Ensure existing ingredients stay in the correct pot
+            this.updatePotContents(potDiv, index);
         });
     }
 
@@ -134,7 +140,14 @@ export default class MixingHallView {
 
         ingredients.forEach((ingredient, index) => {
             let ingredientDiv = document.createElement("div");
-            let { width, height, borderRadius, boxShadow, animation, innerText } = this.getShapeStyles(ingredient.structure);
+            let {
+                width,
+                height,
+                borderRadius,
+                boxShadow,
+                animation,
+                innerText
+            } = this.getShapeStyles(ingredient.structure);
 
             Object.assign(ingredientDiv.style, {
                 width,
@@ -284,9 +297,6 @@ export default class MixingHallView {
     }
 
 
-
-
-
     updatePotContents(potDiv, potIndex) {
         potDiv.innerHTML = "";
 
@@ -312,7 +322,14 @@ export default class MixingHallView {
 
         ingredients.forEach((ingredient, index) => {
             let ingredientDiv = document.createElement("div");
-            let { width, height, borderRadius, boxShadow, animation, innerText } = this.getShapeStyles(ingredient.structure);
+            let {
+                width,
+                height,
+                borderRadius,
+                boxShadow,
+                animation,
+                innerText
+            } = this.getShapeStyles(ingredient.structure);
 
             Object.assign(ingredientDiv.style, {
                 width: `${ingredientSize}px`,
