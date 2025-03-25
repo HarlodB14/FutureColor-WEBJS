@@ -5,30 +5,94 @@ export default class MixingHallView {
     constructor(controller) {
         this.mixingPotContents = new Map();
         this.controller = controller;
+        this.setupLayout();
+    }
+
+    setupLayout() {
+        // Create main container that will hold all areas
+        let mainContainer = document.createElement("div");
+        mainContainer.id = "mainContainer";
+        Object.assign(mainContainer.style, {
+            display: "flex",
+            width: "100%",
+            minHeight: "100vh",
+            position: "relative"
+        });
+        document.body.appendChild(mainContainer);
+
+        // Create left area for mixing pots and ingredients (40%)
+        let leftArea = document.createElement("div");
+        leftArea.id = "mixingAreaContainer";
+        Object.assign(leftArea.style, {
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "flex-start",
+            gap: "40px",
+            marginTop: "70px", // Increased to account for the form
+            padding: "20px",
+            width: "40%",
+            minHeight: "100vh",
+            boxSizing: "border-box"
+        });
+        mainContainer.appendChild(leftArea);
+
+        // Create middle area for mixing machines (20%)
+        let middleArea = document.createElement("div");
+        middleArea.id = "machineAreaContainer";
+        Object.assign(middleArea.style, {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "20px",
+            backgroundColor: "transparent",
+            width: "20%",
+            minHeight: "100vh",
+            boxSizing: "border-box",
+            borderLeft: "1px dashed #ccc",
+            borderRight: "1px dashed #ccc"
+        });
+        mainContainer.appendChild(middleArea);
+
+        // Create right area for buttons (40%)
+        let rightArea = document.createElement("div");
+        rightArea.id = "rightContainer";
+        Object.assign(rightArea.style, {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            padding: "40px 20px",
+            width: "40%",
+            minHeight: "100vh",
+            boxSizing: "border-box"
+        });
+        mainContainer.appendChild(rightArea);
     }
 
     drawButtonContainer() {
-        let buttonContainer = document.getElementById("addPotButtonContainer");
-        if (!buttonContainer) {
-            buttonContainer = document.createElement("div");
-            buttonContainer.id = "addPotButtonContainer";
-            buttonContainer.style.position = "fixed";
-            buttonContainer.style.top = "20px";
-            buttonContainer.style.right = "20px";
-            buttonContainer.style.zIndex = "1000";
-            document.body.appendChild(buttonContainer);
+        let rightContainer = document.getElementById("rightContainer");
+        if (!rightContainer) {
+            return; // The container should already exist from setupLayout
         }
 
-        // Clear existing buttons
-        buttonContainer.innerHTML = "";
+        let buttonContainer = document.createElement("div");
+        buttonContainer.id = "addPotButtonContainer";
+        Object.assign(buttonContainer.style, {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "15px",
+            marginTop: "20px"
+        });
 
         // Button to add a new mixing pot
         let addPotButton = document.createElement("button");
         addPotButton.id = "addNewMixingPot";
         addPotButton.textContent = "Mengpot toevoegen";
         Object.assign(addPotButton.style, this.getButtonStyles());
-
         addPotButton.addEventListener("click", () => this.controller.createMixingPot());
+
+        // Button to add a new mixing machine
         let addMachineButton = document.createElement("button");
         addMachineButton.id = "addNewMixingMachine";
         addMachineButton.textContent = "Mixmachine toevoegen";
@@ -37,12 +101,13 @@ export default class MixingHallView {
 
         buttonContainer.appendChild(addPotButton);
         buttonContainer.appendChild(addMachineButton);
+        rightContainer.appendChild(buttonContainer);
     }
 
     getButtonStyles() {
         return {
-            padding: "10px 15px",
-            fontSize: "16px",
+            padding: "15px 20px",
+            fontSize: "18px",
             cursor: "pointer",
             border: "none",
             backgroundColor: "#4CAF50",
@@ -51,27 +116,15 @@ export default class MixingHallView {
             boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.2)",
             marginBottom: "10px",
             display: "block",
-            width: "200px",
+            width: "250px",
+            transition: "all 0.3s ease"
         };
     }
+
     drawMixingMachines(mixingMachines) {
         let areaContainer = document.getElementById("machineAreaContainer");
         if (!areaContainer) {
-            areaContainer = document.createElement("div");
-            areaContainer.id = "machineAreaContainer";
-            document.body.appendChild(areaContainer);
-
-            Object.assign(areaContainer.style, {
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                padding: "20px",
-                backgroundColor: "transparent",
-                width: "100%",
-                minHeight: "100vh",
-                boxSizing: "border-box",
-                overflowX: "hidden"
-            });
+            return; // The container should already exist from setupLayout
         }
 
         let container = document.getElementById("mixingMachinesContainer");
@@ -89,8 +142,10 @@ export default class MixingHallView {
                 borderRadius: "10px",
                 border: "2px solid #333",
                 boxShadow: "0 0 20px rgba(0,0,0,0.2)",
-                width: "80%",
-                maxWidth: "300px"
+                width: "90%",
+                maxWidth: "300px",
+                overflowY: "auto",
+                maxHeight: "90vh"
             });
         }
 
@@ -105,7 +160,7 @@ export default class MixingHallView {
 
             // Machine container
             Object.assign(machineDiv.style, {
-                width: "250px",
+                width: "100%",
                 height: "250px",
                 backgroundColor: "#f0f0f0",
                 border: "3px solid #555",
@@ -118,7 +173,8 @@ export default class MixingHallView {
                 alignItems: "center",
                 overflow: "hidden",
                 padding: "15px",
-                boxSizing: "border-box"
+                boxSizing: "border-box",
+                marginBottom: "30px"
             });
 
             // Machine label
@@ -206,18 +262,7 @@ export default class MixingHallView {
     drawMixingPots(mixingPots) {
         let areaContainer = document.getElementById("mixingAreaContainer");
         if (!areaContainer) {
-            areaContainer = document.createElement("div");
-            areaContainer.id = "mixingAreaContainer";
-            document.body.appendChild(areaContainer);
-
-            Object.assign(areaContainer.style, {
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "flex-start",
-                gap: "40px",
-                marginTop: "20px",
-                padding: "10px",
-            });
+            return; // The container should already exist from setupLayout
         }
 
         let container = document.getElementById("mixingPotsContainer");
@@ -283,8 +328,7 @@ export default class MixingHallView {
 
         let areaContainer = document.getElementById("mixingAreaContainer");
         if (!areaContainer) {
-            this.drawMixingPots([]);
-            areaContainer = document.getElementById("mixingAreaContainer");
+            return; // The container should already exist from setupLayout
         }
 
         container = document.createElement("div");
@@ -346,6 +390,17 @@ export default class MixingHallView {
     drawIngredientForm() {
         const container = document.createElement('div');
         container.className = 'formContainer';
+        Object.assign(container.style, {
+            position: "fixed",
+            top: "0",
+            left: "0",
+            zIndex: "999",
+            padding: "10px",
+            backgroundColor: "#f5f5f5",
+            borderRadius: "0 0 10px 0",
+            boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.2)"
+        });
+        
         const form = document.createElement('form');
         form.className = 'ingredient-form';
 
@@ -462,7 +517,6 @@ export default class MixingHallView {
         this.controller.view.drawIngredients(this.controller.getIngredients());
     }
 
-
     updatePotContents(potDiv, potIndex) {
         potDiv.innerHTML = "";
 
@@ -514,6 +568,55 @@ export default class MixingHallView {
 
             ingredientDiv.innerText = innerText || '';
             potDiv.appendChild(ingredientDiv);
+        });
+    }
+
+    mouseMove(e) {
+        let ingredientTop = this.draggedElement;
+        if (!ingredientTop) return;
+
+        let newX = e.clientX - this.startX;
+        let newY = e.clientY - this.startY;
+
+        ingredientTop.style.top = `${ingredientTop.offsetTop + newY}px`;
+        ingredientTop.style.left = `${ingredientTop.offsetLeft + newX}px`;
+
+        this.startX = e.clientX;
+        this.startY = e.clientY;
+    }
+
+    mouseUp() {
+        document.removeEventListener("mousemove", this.mouseMove);
+        document.removeEventListener("mouseup", this.mouseUp);
+        this.draggedElement = null;
+    }
+
+    mouseDown(e) {
+        this.startX = e.clientX;
+        this.startY = e.clientY;
+        this.draggedElement = e.target;
+
+        document.addEventListener("mousemove", this.mouseMove);
+        document.addEventListener("mouseup", this.mouseUp);
+    }
+
+    showValidationErrors(errors, form) {
+        // Remove existing error messages
+        const existingErrors = form.querySelectorAll('.error-message');
+        existingErrors.forEach(error => error.remove());
+
+        // Display new error messages
+        errors.forEach(error => {
+            const field = form.querySelector(`#${error.field}`);
+            if (field) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.style.color = 'red';
+                errorDiv.style.fontSize = '12px';
+                errorDiv.style.marginTop = '5px';
+                errorDiv.textContent = error.message;
+                field.parentNode.appendChild(errorDiv);
+            }
         });
     }
 }

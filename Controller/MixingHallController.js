@@ -7,12 +7,14 @@ export default class MixingHallController {
     constructor() {
         this.mixingHall = new MixingHall();
         this.view = new MixingHallView(this);
+        
+        // First draw the layout, then the components
         this.view.drawIngredientForm();
         this.view.drawMixingPots(this.mixingHall.mixingPots);
         this.view.drawButtonContainer();
         this.view.drawMixingMachines(this.mixingHall.mixMachines);
 
-        //muis acties binden
+        // Mouse actions binding
         this.mouseMove = this.mouseMove.bind(this);
         this.mouseUp = this.mouseUp.bind(this);
     }
