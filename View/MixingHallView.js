@@ -7,7 +7,7 @@ export default class MixingHallView {
         this.controller = controller;
     }
 
-    drawAddPotButton() {
+    drawButtonContainer() {
         let buttonContainer = document.getElementById("addPotButtonContainer");
         if (!buttonContainer) {
             buttonContainer = document.createElement("div");
@@ -19,22 +19,188 @@ export default class MixingHallView {
             document.body.appendChild(buttonContainer);
         }
 
-        let button = document.createElement("button");
-        button.id = "addNewMixingPot";
-        button.textContent = "Mengpot toevoegen";
-        button.style.padding = "10px 15px";
-        button.style.fontSize = "16px";
-        button.style.cursor = "pointer";
-        button.style.border = "none";
-        button.style.backgroundColor = "#4CAF50";
-        button.style.color = "white";
-        button.style.borderRadius = "5px";
-        button.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.2)";
-
-        button.addEventListener("click", () => this.controller.createMixingPot());
-
+        // Clear existing buttons
         buttonContainer.innerHTML = "";
-        buttonContainer.appendChild(button);
+
+        // Button to add a new mixing pot
+        let addPotButton = document.createElement("button");
+        addPotButton.id = "addNewMixingPot";
+        addPotButton.textContent = "Mengpot toevoegen";
+        Object.assign(addPotButton.style, this.getButtonStyles());
+
+        addPotButton.addEventListener("click", () => this.controller.createMixingPot());
+        let addMachineButton = document.createElement("button");
+        addMachineButton.id = "addNewMixingMachine";
+        addMachineButton.textContent = "Mixmachine toevoegen";
+        Object.assign(addMachineButton.style, this.getButtonStyles());
+        addMachineButton.addEventListener("click", () => this.controller.createMixingMachine());
+
+        buttonContainer.appendChild(addPotButton);
+        buttonContainer.appendChild(addMachineButton);
+    }
+
+    getButtonStyles() {
+        return {
+            padding: "10px 15px",
+            fontSize: "16px",
+            cursor: "pointer",
+            border: "none",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            borderRadius: "5px",
+            boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.2)",
+            marginBottom: "10px",
+            display: "block",
+            width: "200px",
+        };
+    }
+    drawMixingMachines(mixingMachines) {
+        let areaContainer = document.getElementById("machineAreaContainer");
+        if (!areaContainer) {
+            areaContainer = document.createElement("div");
+            areaContainer.id = "machineAreaContainer";
+            document.body.appendChild(areaContainer);
+
+            Object.assign(areaContainer.style, {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                padding: "20px",
+                backgroundColor: "transparent",
+                width: "100%",
+                minHeight: "100vh",
+                boxSizing: "border-box",
+                overflowX: "hidden"
+            });
+        }
+
+        let container = document.getElementById("mixingMachinesContainer");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "mixingMachinesContainer";
+            areaContainer.appendChild(container);
+
+            Object.assign(container.style, {
+                display: "flex",
+                flexDirection: "column",
+                gap: "30px",
+                padding: "20px",
+                backgroundColor: "rgba(255,255,255,0.8)",
+                borderRadius: "10px",
+                border: "2px solid #333",
+                boxShadow: "0 0 20px rgba(0,0,0,0.2)",
+                width: "80%",
+                maxWidth: "300px"
+            });
+        }
+
+        // Clear existing machines
+        container.innerHTML = "";
+
+        // Create each machine in vertical layout
+        mixingMachines.forEach((machine, index) => {
+            const machineDiv = document.createElement("div");
+            machineDiv.className = "mixing-machine";
+            machineDiv.setAttribute("data-index", index);
+
+            // Machine container
+            Object.assign(machineDiv.style, {
+                width: "250px",
+                height: "250px",
+                backgroundColor: "#f0f0f0",
+                border: "3px solid #555",
+                borderRadius: "5px",
+                position: "relative",
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "center",
+                overflow: "hidden",
+                padding: "15px",
+                boxSizing: "border-box"
+            });
+
+            // Machine label
+            const machineLabel = document.createElement("div");
+            machineLabel.textContent = `Mixer ${index + 1}`;
+            Object.assign(machineLabel.style, {
+                width: "100%",
+                textAlign: "center",
+                fontWeight: "bold",
+                fontSize: "18px",
+                color: "#333",
+                padding: "5px",
+                backgroundColor: "rgba(200,200,200,0.5)",
+                borderRadius: "3px",
+                marginBottom: "10px"
+            });
+            machineDiv.appendChild(machineLabel);
+
+            // Status indicator
+            const statusLight = document.createElement("div");
+            Object.assign(statusLight.style, {
+                width: "15px",
+                height: "15px",
+                backgroundColor: "#4CAF50",
+                borderRadius: "50%",
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                boxShadow: "0 0 5px rgba(0,0,0,0.3)"
+            });
+            machineDiv.appendChild(statusLight);
+
+            // Drop zone for pots
+            const dropZone = document.createElement("div");
+            dropZone.className = "machine-drop-zone";
+            Object.assign(dropZone.style, {
+                width: "90%",
+                height: "150px",
+                backgroundColor: "rgba(200,200,200,0.5)",
+                border: "2px dashed #666",
+                borderRadius: "5px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontSize: "14px",
+                color: "#444",
+                textAlign: "center",
+                padding: "10px",
+                boxSizing: "border-box",
+                marginTop: "auto"
+            });
+            dropZone.textContent = "Drop mixing pot here";
+            machineDiv.appendChild(dropZone);
+
+            // Make drop zone functional
+            dropZone.addEventListener("dragover", (e) => {
+                this.onDragOver(e);
+                dropZone.style.backgroundColor = "rgba(180,180,255,0.5)";
+            });
+            dropZone.addEventListener("dragleave", () => {
+                dropZone.style.backgroundColor = "rgba(200,200,200,0.5)";
+            });
+            dropZone.addEventListener("drop", (e) => {
+                dropZone.style.backgroundColor = "rgba(200,200,200,0.5)";
+                this.onMachineDrop(e, index);
+            });
+
+            container.appendChild(machineDiv);
+        });
+    }
+
+    onMachineDrop(e, machineIndex) {
+        e.preventDefault();
+        const draggedIndex = e.dataTransfer.getData("text");
+        let targetPot = e.target.closest("[data-index]");
+
+        if (!targetPot) return;
+
+        // You might want to add specific logic here for what happens
+        // when a pot is dropped into a machine
+        console.log(`Pot ${draggedIndex} dropped into Machine ${machineIndex}`);
+        // this.controller.handlePotToMachine(draggedIndex, machineIndex);
     }
 
     drawMixingPots(mixingPots) {

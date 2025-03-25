@@ -9,7 +9,8 @@ export default class MixingHallController {
         this.view = new MixingHallView(this);
         this.view.drawIngredientForm();
         this.view.drawMixingPots(this.mixingHall.mixingPots);
-        this.view.drawAddPotButton();
+        this.view.drawButtonContainer();
+        this.view.drawMixingMachines(this.mixingHall.mixMachines);
 
         //muis acties binden
         this.mouseMove = this.mouseMove.bind(this);
@@ -50,6 +51,13 @@ export default class MixingHallController {
         let mixingPot = { id, ingredients: [] };
         this.mixingHall.mixingPots.push(mixingPot);
         this.view.drawMixingPots(this.mixingHall.mixingPots);
+    }
+
+    createMixingMachine() {
+        let id = this.mixingHall.mixMachines.length;
+        let mixMachine = { id, pot_contents: [], mixingSpeed: 0, mixingTime: 0, };
+        this.mixingHall.mixMachines.push(mixMachine);
+        this.view.drawMixingMachines(this.mixingHall.mixMachines);
     }
 
     handleFormData(e, form) {
