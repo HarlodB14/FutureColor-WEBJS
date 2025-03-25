@@ -1,5 +1,4 @@
 import CreateInput from "../Helpers/CreateInput.js";
-import Colors from "../Enums/Colors.js";
 import Structures from "../Enums/Structures.js";
 
 export default class MixingHallView {
@@ -215,7 +214,7 @@ export default class MixingHallView {
         container.appendChild(form);
         document.body.appendChild(container);
 
-        form.addEventListener('submit', (e) => this.mixingHallController.handleFormData(e, form));
+        form.addEventListener('submit', (e) => this.controller.handleFormData(e, form));
         
         // Helper function to convert hex to HSL
         function hexToHSL(hex) {
