@@ -4,6 +4,8 @@ export default class ColorTester {
     constructor() {
         this.id = Date.now();
         this.canvasses = [];
+        this.rows = 6;
+        this.cols = 6;
     }
 
     createCanvas(rows, cols, id = null) {
@@ -52,12 +54,75 @@ export default class ColorTester {
         title.textContent = 'Color Tester';
         container.appendChild(title);
         
+        // Add resize event listener to handle viewport changes
+        window.addEventListener('resize', () => {
+            this.updateGrid();
+        });
+        
+        // Create grid controls
+        const controlsContainer = document.createElement('div');
+        controlsContainer.id = 'gridControls';
+        controlsContainer.style.marginBottom = '15px';
+        
+        // Rows input
+        const rowsLabel = document.createElement('label');
+        rowsLabel.textContent = 'Rows: ';
+        rowsLabel.setAttribute('for', 'rowsInput');
+        
+        const rowsInput = document.createElement('input');
+        rowsInput.type = 'number';
+        rowsInput.id = 'rowsInput';
+        rowsInput.min = '1';
+        rowsInput.max = '10';
+        rowsInput.value = this.rows;
+        rowsInput.style.width = '50px';
+        rowsInput.style.marginRight = '15px';
+        
+        // Columns input
+        const colsLabel = document.createElement('label');
+        colsLabel.textContent = 'Columns: ';
+        colsLabel.setAttribute('for', 'colsInput');
+        
+        const colsInput = document.createElement('input');
+        colsInput.type = 'number';
+        colsInput.id = 'colsInput';
+        colsInput.min = '1';
+        colsInput.max = '10';
+        colsInput.value = this.cols;
+        colsInput.style.width = '50px';
+        colsInput.style.marginRight = '15px';
+        
+        // Update button
+        const updateButton = document.createElement('button');
+        updateButton.textContent = 'Update Grid';
+        updateButton.style.padding = '5px 10px';
+        
+        // Add event listener for the update button
+        updateButton.addEventListener('click', () => {
+            const newRows = parseInt(rowsInput.value, 10);
+            const newCols = parseInt(colsInput.value, 10);
+            
+            // Validate input
+            if (newRows >= 1 && newRows <= 10 && newCols >= 1 && newCols <= 10) {
+                this.rows = newRows;
+                this.cols = newCols;
+                this.updateGrid();
+            } else {
+                alert('Please enter values between 1 and 10 for rows and columns.');
+            }
+        });
+        
+        // Append controls to container
+        controlsContainer.appendChild(rowsLabel);
+        controlsContainer.appendChild(rowsInput);
+        controlsContainer.appendChild(colsLabel);
+        controlsContainer.appendChild(colsInput);
+        controlsContainer.appendChild(updateButton);
+        container.appendChild(controlsContainer);
+        
         // Create grid container
         const gridContainer = document.createElement('div');
         gridContainer.id = 'colorGrid';
-        
-        // Set grid layout with basic attributes
-        gridContainer.setAttribute('style', 'display: grid; grid-template-columns: repeat(6, 40px); gap: 5px;');
         container.appendChild(gridContainer);
         
         // Create modal for color info
@@ -66,9 +131,48 @@ export default class ColorTester {
         modal.setAttribute('style', 'display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid black; z-index: 100;');
         document.body.appendChild(modal);
         
-        // Create 36 color squares (6x6 grid)
-        for (let i = 0; i < 36; i++) {
-            const canvas = this.createCanvas(6, 6);
+        // Initialize the grid
+        this.updateGrid();
+    }
+    
+    updateGrid() {
+        // Get the grid container
+        const gridContainer = document.getElementById('colorGrid');
+        if (!gridContainer) return;
+        
+        // Clear existing grid
+        gridContainer.innerHTML = '';
+        this.canvasses = [];
+        
+        // Calculate grid size based on 30% of viewport height
+        // Use the same value for width to make a perfect square
+        const gridSize = Math.floor(window.innerHeight * 0.3);
+        
+        const gap = 5;
+        
+        // Calculate cell size based on the grid dimensions and available space
+        const cellSize = Math.floor((gridSize - (Math.max(this.rows, this.cols) - 1) * gap) / Math.max(this.rows, this.cols));
+        
+        // Calculate the actual grid dimensions
+        const actualGridWidth = this.cols * cellSize + (this.cols - 1) * gap;
+        const actualGridHeight = this.rows * cellSize + (this.rows - 1) * gap;
+        
+        // Set grid layout with calculated attributes
+        gridContainer.setAttribute('style', 
+            `display: grid; 
+             grid-template-columns: repeat(${this.cols}, ${cellSize}px); 
+             gap: ${gap}px; 
+             width: ${actualGridWidth}px;
+             height: ${actualGridHeight}px;
+             max-width: ${gridSize}px;
+             max-height: ${gridSize}px;
+             aspect-ratio: 1/1;
+             margin: 0 auto;`);
+        
+        // Create color squares based on rows and columns
+        const totalSquares = this.rows * this.cols;
+        for (let i = 0; i < totalSquares; i++) {
+            const canvas = this.createCanvas(this.rows, this.cols);
             
             // Create a color square
             const square = document.createElement('div');
@@ -80,7 +184,7 @@ export default class ColorTester {
             const colorString = canvas.getColorAsString(midRow, midCol);
             
             // Set square color
-            square.setAttribute('style', `width: 40px; height: 40px; background-color: ${colorString}; border: 1px solid #ccc; cursor: pointer;`);
+            square.setAttribute('style', `width: ${cellSize}px; height: ${cellSize}px; background-color: ${colorString}; border: 1px solid #ccc; cursor: pointer;`);
             
             // Store color data
             square.dataset.h = color.h;
@@ -93,7 +197,7 @@ export default class ColorTester {
                 const s = parseInt(e.target.dataset.s);
                 const l = parseInt(e.target.dataset.l);
                 
-                this.showColorModal(modal, { h, s, l });
+                this.showColorModal(document.getElementById('colorModal'), { h, s, l });
             });
             
             gridContainer.appendChild(square);
