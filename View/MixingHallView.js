@@ -7,6 +7,15 @@ export default class MixingHallView {
         this.controller = controller;
         this.setupLayout();
     }
+    
+    // Update weather text with data provided by controller
+    updateWeatherText(temperature, isPrecipitation) {
+        const weatherText = document.getElementById("weatherText");
+        if (weatherText) {
+            const temp = temperature !== null ? temperature.toFixed(1) : "N/A";
+            weatherText.textContent = `Temperatuur: ${temp}°C | Neerslag: ${isPrecipitation ? "Ja" : "Nee"}`;
+        }
+    }
 
     setupLayout() {
         // Create main container that will hold all areas
@@ -471,6 +480,12 @@ export default class MixingHallView {
         submitButton.type = 'submit';
         submitButton.textContent = 'Ingrediënt aanmaken';
         form.appendChild(submitButton);
+
+        // Add weather text below the form
+        const weatherText = document.createElement('div');
+        weatherText.id = 'weatherText';
+        weatherText.textContent = 'Temperature: Loading... | Precipitation: Loading...';
+        form.appendChild(weatherText);
 
         container.appendChild(form);
         document.body.appendChild(container);
