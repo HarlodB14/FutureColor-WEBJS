@@ -35,7 +35,47 @@ export default class IngredientView {
         let createInput = new CreateInput();
         form.appendChild(createInput.createInputField('Mengtijd (ms)', 'amountOfMixingTime', 'number'));
         form.appendChild(createInput.createInputField('Mengsnelheid', 'mixingSpeed', 'number'));
-        form.appendChild(createInput.createInputField('Kleur (HSL)', 'color', 'text'));
+        
+        // Create a container for the color input and color picker
+        const colorContainer = document.createElement('div');
+        colorContainer.className = 'color-input-container';
+        
+        // Create the color input field
+        const colorFieldContainer = createInput.createInputField('Kleur (HSL)', 'color', 'text');
+        colorContainer.appendChild(colorFieldContainer);
+        
+        // Get the actual input element inside the container
+        const colorInput = colorFieldContainer.querySelector('input');
+        colorInput.placeholder = 'hsl(120, 50%, 50%)';
+        
+        // Add color picker next to the text input
+        const colorPicker = document.createElement('input');
+        colorPicker.type = 'color';
+        colorPicker.id = 'colorPicker';
+        colorPicker.className = 'color-picker';
+        colorContainer.appendChild(colorPicker);
+        
+        // Add event listener to update the HSL text input when the color picker changes
+        colorPicker.addEventListener('input', () => {
+            const hexColor = colorPicker.value;
+            const hslColor = this.hexToHSL(hexColor);
+            colorInput.value = hslColor;
+        });
+        
+        // Add event listener to update the color picker when the HSL text input changes
+        colorInput.addEventListener('input', () => {
+            try {
+                const hslColor = colorInput.value;
+                if (hslColor.startsWith('hsl(') && hslColor.endsWith(')')) {
+                    const hexColor = this.hslToHex(hslColor);
+                    colorPicker.value = hexColor;
+                }
+            } catch (e) {
+                // Do nothing if parsing fails - let form validation handle errors
+            }
+        });
+        
+        form.appendChild(colorContainer);
 
         const submitButton = document.createElement('button');
         submitButton.type = 'submit';
@@ -52,6 +92,91 @@ export default class IngredientView {
         document.body.appendChild(container);
 
         form.addEventListener('submit', (e) => this.controller.handleFormData(e, form));
+
+        // Set default value for color picker and input
+        colorPicker.value = '#00ff00'; // Default to green
+        colorInput.value = 'hsl(120, 100%, 50%)'; // Green in HSL
+    }
+    
+    // Convert hex color to HSL format
+    hexToHSL(hex) {
+        // Remove the # if present
+        hex = hex.replace(/^#/, '');
+        
+        // Parse the hex values
+        let r = parseInt(hex.slice(0, 2), 16) / 255;
+        let g = parseInt(hex.slice(2, 4), 16) / 255;
+        let b = parseInt(hex.slice(4, 6), 16) / 255;
+        
+        // Find the min and max values to calculate the lightness
+        let max = Math.max(r, g, b);
+        let min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+        
+        if (max === min) {
+            // Achromatic (grey)
+            h = 0;
+            s = 0;
+        } else {
+            // Calculate hue and saturation
+            let d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            
+            h = Math.round(h * 60);
+        }
+        
+        s = Math.round(s * 100);
+        l = Math.round(l * 100);
+        
+        return `hsl(${h}, ${s}%, ${l}%)`;
+    }
+    
+    // Convert HSL color to hex format
+    hslToHex(hsl) {
+        // Parse the HSL values
+        const matches = hsl.match(/hsl\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*\)/i);
+        
+        if (!matches) return '#000000';
+        
+        let h = parseInt(matches[1]) / 360;
+        let s = parseInt(matches[2]) / 100;
+        let l = parseInt(matches[3]) / 100;
+        
+        // No saturation means it's a shade of grey
+        if (s === 0) {
+            let val = Math.round(l * 255);
+            return `#${val.toString(16).padStart(2, '0').repeat(3)}`;
+        }
+        
+        // Helper function for the conversion
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+        
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        
+        const r = Math.round(hue2rgb(p, q, h + 1/3) * 255);
+        const g = Math.round(hue2rgb(p, q, h) * 255);
+        const b = Math.round(hue2rgb(p, q, h - 1/3) * 255);
+        
+        const toHex = (val) => {
+            const hex = val.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        };
+        
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
     }
 
     drawIngredients(ingredients) {
@@ -102,30 +227,30 @@ export default class IngredientView {
 
     getStructureClass(structure) {
         switch (structure) {
-            case Structures.GRAIN: return 'grain';
-            case Structures.ROUGH_GRAIN: return 'rough-grain';
-            case Structures.SMOOTH: return 'smooth';
-            case Structures.SLIMEY: return 'slimey';
+            case "korrel": return 'grain';
+            case "grove korrel": return 'rough-grain';
+            case "glad": return 'smooth';
+            case "slijmerig": return 'slimey';
             default: return '';
         }
     }
     
     getStructureText(structure) {
         switch (structure) {
-            case Structures.GRAIN: return 'K';
-            case Structures.ROUGH_GRAIN: return 'GK';
-            case Structures.SMOOTH: return 'G';
-            case Structures.SLIMEY: return 'S';
+            case "korrel": return 'K';
+            case "grove korrel": return 'GK';
+            case "glad": return 'G';
+            case "slijmerig": return 'S';
             default: return '';
         }
     }
     
     getLineHeight(structure) {
         switch (structure) {
-            case Structures.GRAIN: return '20px';
-            case Structures.ROUGH_GRAIN: return '60px';
-            case Structures.SMOOTH: return '50px';
-            case Structures.SLIMEY: return '30px';
+            case "korrel": return '20px';
+            case "grove korrel": return '60px';
+            case "glad": return '50px';
+            case "slijmerig": return '30px';
             default: return '50px';
         }
     }
@@ -143,14 +268,15 @@ export default class IngredientView {
             areaContainer.appendChild(container);
         }
 
-        // Check for pots specifically in mixingPotsContainer
+        // Clear all existing pots so we can redraw them with correct indexes
+        container.innerHTML = "";
+        
+        // For debugging
+        console.log("Drawing pots, current mixingPots array:", mixingPots);
+        console.log("Current mixingPotContents Map:", new Map(this.mixingPotContents));
+        
+        // Now create pots with updated indexes
         mixingPots.forEach((pot, index) => {
-            // Check if a pot with this specific index already exists in the mixing pots container
-            let potSelector = `#mixingPotsContainer > [data-index="${index}"]`;
-            if (document.querySelector(potSelector)) {
-                return; // Skip existing pots
-            }
-
             let potDiv = document.createElement("div");
             potDiv.className = "mixing-pot";
 
@@ -168,24 +294,50 @@ export default class IngredientView {
 
             container.appendChild(potDiv);
 
-            // Ensure existing ingredients stay in the correct pot
-            this.updatePotContents(potDiv, index);
+            // Initialize the tracking in the view to exactly match the model
+            // This is the most important step to avoid duplication
+            this.mixingPotContents.set(index.toString(), [...(pot.ingredients || [])]);
+
+            // Draw the ingredients inside the pot
+            this.updatePotContents(potDiv, index.toString());
         });
+        
+        // For debugging: log the current state after update
+        console.log("After drawing, mixingPotContents Map:", new Map(this.mixingPotContents));
     }
 
     updatePotContents(potDiv, potIndex) {
+        // Clear existing content
         potDiv.innerHTML = "";
 
-        const ingredients = this.mixingPotContents.get(potIndex) || [];
+        const potIndexNum = parseInt(potIndex, 10);
+        
+        // Get ingredients from the model directly (source of truth)
+        // Only use mixingPotContents as a fallback
+        let ingredients = [];
+        
+        if (this.controller.mixingHall.mixingPots[potIndexNum] && 
+            this.controller.mixingHall.mixingPots[potIndexNum].ingredients) {
+            // Get from model (preferred)
+            ingredients = this.controller.mixingHall.mixingPots[potIndexNum].ingredients;
+        } else if (this.mixingPotContents.has(potIndex)) {
+            // Fallback to the view's tracking
+            ingredients = this.mixingPotContents.get(potIndex);
+        }
+        
+        // Log for debugging
+        console.log(`Updating pot ${potIndex} contents:`, ingredients);
+
+        // Set dimensions
         const maxPerRow = 3;
         const spacing = 4;
         const ingredientSize = 30; // Adjust based on your design
 
-        // max aantal rijen pakken
+        // Calculate pot height
         const numRows = Math.ceil(ingredients.length / maxPerRow);
         const potHeight = numRows * (ingredientSize + spacing) + 20; // Adding padding
 
-        // potgroote dynamisch aanpassen
+        // Adjust pot size
         potDiv.style.height = `${Math.max(100, potHeight)}px`; // Minimum height of 100px
         
         // Update pot's mixing speed attribute from first ingredient (if exists)
@@ -203,7 +355,8 @@ export default class IngredientView {
             potDiv.setAttribute('data-mixing-speed', '');
         }
 
-        ingredients.forEach((ingredient, index) => {
+        // Create visual representation of each ingredient
+        ingredients.forEach((ingredient) => {
             let ingredientDiv = document.createElement("div");
             ingredientDiv.className = 'ingredient';
             ingredientDiv.classList.add(this.getStructureClass(ingredient.structure));
@@ -260,23 +413,32 @@ export default class IngredientView {
         if (!targetPot) return;
 
         const targetPotIndex = targetPot.dataset.index;
+        const potIndexNum = parseInt(targetPotIndex, 10);
+        
+        // Check if the pot exists in the model
+        if (!this.controller.mixingHall.mixingPots[potIndexNum]) {
+            console.error(`Pot with index ${potIndexNum} not found in model`);
+            return;
+        }
+        
+        // Initialize the view's tracking if needed
         if (!this.mixingPotContents.has(targetPotIndex)) {
             this.mixingPotContents.set(targetPotIndex, []);
         }
-        const potContents = this.mixingPotContents.get(targetPotIndex);
         
-        // We've removed the ingredient limit check here
-
         // Get the dragged ingredient
         const ingredient = this.controller.getIngredientByIndex(draggedIndex);
         if (!ingredient) return;
+        
+        // Check pot contents from the model (source of truth)
+        const modelPotContents = this.controller.mixingHall.mixingPots[potIndexNum].ingredients || [];
         
         // Get current pot mixing speed (if any ingredients exist)
         const potMixingSpeed = targetPot.getAttribute('data-mixing-speed');
         const ingredientMixingSpeed = ingredient.mixingSpeed;
         
         // Check if this is the first ingredient or if mixing speeds match
-        if (potContents.length === 0) {
+        if (modelPotContents.length === 0) {
             // First ingredient - set the pot's mixing speed
             targetPot.setAttribute('data-mixing-speed', ingredientMixingSpeed);
         } else if (potMixingSpeed !== ingredientMixingSpeed.toString()) {
@@ -285,12 +447,27 @@ export default class IngredientView {
             return;
         }
         
-        // If we got here, ingredient can be added to pot
-        potContents.push(ingredient);
+        // Remove ingredient from available ingredients
         this.controller.removeIngredient(draggedIndex);
-
+        
+        // Update the model: Add the ingredient to the pot in the model (only once)
+        if (!this.controller.mixingHall.mixingPots[potIndexNum].ingredients) {
+            this.controller.mixingHall.mixingPots[potIndexNum].ingredients = [];
+        }
+        this.controller.mixingHall.mixingPots[potIndexNum].ingredients.push(ingredient);
+        
+        // Update the view's tracking to match the model
+        this.mixingPotContents.set(targetPotIndex, [...this.controller.mixingHall.mixingPots[potIndexNum].ingredients]);
+        
+        // Update the visual representation
         this.updatePotContents(targetPot, targetPotIndex);
+        
+        // Redraw ingredients list
         this.controller.view.drawIngredients(this.controller.getIngredients());
+        
+        // Log the contents for debugging
+        console.log(`Added ingredient to pot ${targetPotIndex}. Current contents:`, 
+                    this.controller.mixingHall.mixingPots[potIndexNum].ingredients);
     }
     
     // Method to show error message near a pot
