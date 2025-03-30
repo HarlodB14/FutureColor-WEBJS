@@ -277,22 +277,31 @@ export default class IngredientView {
         
         // Now create pots with updated indexes
         mixingPots.forEach((pot, index) => {
-            let potDiv = document.createElement("div");
+            // Create a container for the pot and its remove button
+            const potContainer = document.createElement("div");
+            potContainer.className = "mixing-pot-container";
+            
+            // Create the pot element
+            const potDiv = document.createElement("div");
             potDiv.className = "mixing-pot";
-
             potDiv.draggable = true;
-            // Bind this context properly for mouseDown
             potDiv.addEventListener("mousedown", (e) => this.mouseDown(e));
             potDiv.setAttribute("data-index", index);
-            
-            // Store the mixing speed for this pot (initially null)
             potDiv.setAttribute("data-mixing-speed", "");
-
             potDiv.addEventListener("dragstart", (e) => this.onDragStart(e));
             potDiv.addEventListener("dragover", (e) => this.onDragOver(e));
             potDiv.addEventListener("drop", (e) => this.onDrop(e));
-
-            container.appendChild(potDiv);
+            
+            // Create the remove button
+            const removeButton = document.createElement("button");
+            removeButton.className = "remove-button pot-remove-button";
+            removeButton.textContent = "X";
+            removeButton.addEventListener("click", () => this.removePot(index));
+            
+            // Add both elements to the container
+            potContainer.appendChild(potDiv);
+            potContainer.appendChild(removeButton);
+            container.appendChild(potContainer);
 
             // Initialize the tracking in the view to exactly match the model
             // This is the most important step to avoid duplication
@@ -304,6 +313,50 @@ export default class IngredientView {
         
         // For debugging: log the current state after update
         console.log("After drawing, mixingPotContents Map:", new Map(this.mixingPotContents));
+    }
+
+    // New method to handle pot removal
+    removePot(index) {
+        // Check if the pot exists
+        if (this.controller.mixingHall.mixingPots[index]) {
+            // Remove the pot from the model
+            this.controller.mixingHall.mixingPots.splice(index, 1);
+            
+            // Update IDs for all remaining pots to match their array index
+            this.controller.mixingHall.mixingPots.forEach((remainingPot, i) => {
+                remainingPot.id = i;
+            });
+            
+            // Clear the mapping for the removed pot
+            this.mixingPotContents.delete(index.toString());
+            
+            // Update the mappings for all remaining pots to match their new indexes
+            const newPotContents = new Map();
+            
+            this.controller.mixingHall.mixingPots.forEach((pot, i) => {
+                // If we have contents for this pot, move them to the new index
+                const oldIndex = pot.id !== undefined ? pot.id : i;
+                if (this.mixingPotContents.has(oldIndex.toString())) {
+                    newPotContents.set(i.toString(), this.mixingPotContents.get(oldIndex.toString()));
+                } else {
+                    newPotContents.set(i.toString(), [...(pot.ingredients || [])]);
+                }
+            });
+            
+            // Replace the old map with the new one
+            this.mixingPotContents.clear();
+            newPotContents.forEach((value, key) => {
+                this.mixingPotContents.set(key, value);
+            });
+            
+            // Redraw all pots to update indexes
+            this.drawMixingPots(this.controller.mixingHall.mixingPots);
+            
+            console.log(`Removed mixing pot at index ${index}`);
+            console.log("Remaining pots:", this.controller.mixingHall.mixingPots);
+        } else {
+            console.error(`Pot with index ${index} not found`);
+        }
     }
 
     updatePotContents(potDiv, potIndex) {

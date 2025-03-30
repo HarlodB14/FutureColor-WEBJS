@@ -98,6 +98,50 @@ export default class MixingHallController {
         this.mixingHall.mixMachines.push(mixMachine);
         this.view.drawMixingMachines(this.mixingHall.mixMachines);
     }
+    
+    // Method to handle removing a mixing machine
+    removeMixingMachine(index) {
+        // Check if the machine exists
+        if (this.mixingHall.mixMachines[index]) {
+            // Remove the machine from the model
+            this.mixingHall.mixMachines.splice(index, 1);
+            
+            // Update IDs for all remaining machines to match their array index
+            this.mixingHall.mixMachines.forEach((machine, i) => {
+                machine.id = i;
+            });
+            
+            // Redraw all machines to update indexes
+            this.view.drawMixingMachines(this.mixingHall.mixMachines);
+            
+            console.log(`Removed mixing machine at index ${index}`);
+            console.log("Remaining machines:", this.mixingHall.mixMachines);
+        } else {
+            console.error(`Machine with index ${index} not found`);
+        }
+    }
+    
+    // Method to handle removing a mixing pot
+    removeMixingPot(index) {
+        // Check if the pot exists
+        if (this.mixingHall.mixingPots[index]) {
+            // Remove the pot from the model
+            this.mixingHall.mixingPots.splice(index, 1);
+            
+            // Update IDs for all remaining pots to match their array index
+            this.mixingHall.mixingPots.forEach((pot, i) => {
+                pot.id = i;
+            });
+            
+            // Redraw all pots to update indexes
+            this.view.drawMixingPots(this.mixingHall.mixingPots);
+            
+            console.log(`Removed mixing pot at index ${index}`);
+            console.log("Remaining pots:", this.mixingHall.mixingPots);
+        } else {
+            console.error(`Pot with index ${index} not found`);
+        }
+    }
 
     handleFormData(e, form) {
         e.preventDefault();
@@ -195,8 +239,21 @@ export default class MixingHallController {
             // Use first ingredient for mixing properties
             const firstIngredient = pot.ingredients[0];
             machine.mixingSpeed = firstIngredient.mixingSpeed;
-            machine.mixingTime = firstIngredient.amountOfMixingTime;
+            
+            // Find the longest mixing time
+            let longestTime = 0;
+            pot.ingredients.forEach(ingredient => {
+                const time = parseInt(ingredient.amountOfMixingTime, 10);
+                if (time > longestTime) {
+                    longestTime = time;
+                }
+            });
+            
+            machine.mixingTime = longestTime;
         }
+        
+        // Set the machine status to mixing
+        machine.status = MixingMachineStatus.MIXING;
         
         // Store the ID of the removed pot for reference
         const potId = pot.id;
