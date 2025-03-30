@@ -373,10 +373,16 @@ export default class MixingHallView {
                 color: "white",
                 fontSize: "12px",
                 cursor: "move",
+                position: "relative", // Added for tooltip positioning
             });
 
             ingredientDiv.draggable = true;
             ingredientDiv.setAttribute('data-index', index);
+            ingredientDiv.setAttribute('data-mixing-speed', ingredient.mixingSpeed);
+
+            // Add hover event listeners for tooltip
+            ingredientDiv.addEventListener("mouseenter", this.showMixingSpeedTooltip);
+            ingredientDiv.addEventListener("mouseleave", this.hideMixingSpeedTooltip);
 
             ingredientDiv.addEventListener("dragstart", (e) => this.onDragStart(e));
             ingredientDiv.addEventListener("dragover", (e) => this.onDragOver(e));
@@ -385,6 +391,40 @@ export default class MixingHallView {
             ingredientDiv.innerText = innerText || '';
             container.appendChild(ingredientDiv);
         });
+    }
+
+    // New method to show tooltip
+    showMixingSpeedTooltip(e) {
+        const mixingSpeed = e.target.getAttribute('data-mixing-speed');
+        
+        let tooltip = document.createElement('div');
+        tooltip.className = 'mixing-speed-tooltip';
+        tooltip.textContent = `mixingspeed: ${mixingSpeed}`;
+        
+        Object.assign(tooltip.style, {
+            position: 'absolute',
+            top: '-30px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            color: 'white',
+            padding: '5px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+            zIndex: '1000'
+        });
+        
+        e.target.appendChild(tooltip);
+    }
+
+    // New method to hide tooltip
+    hideMixingSpeedTooltip(e) {
+        const tooltip = e.target.querySelector('.mixing-speed-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
     }
 
     drawIngredientForm() {
@@ -564,9 +604,16 @@ export default class MixingHallView {
                 alignItems: "center",
                 color: "white",
                 fontSize: "10px",
+                position: "relative", // Added for tooltip positioning
             });
 
             ingredientDiv.innerText = innerText || '';
+            ingredientDiv.setAttribute('data-mixing-speed', ingredient.mixingSpeed);
+            
+            // Add hover event listeners to pot ingredients as well
+            ingredientDiv.addEventListener("mouseenter", this.showMixingSpeedTooltip);
+            ingredientDiv.addEventListener("mouseleave", this.hideMixingSpeedTooltip);
+            
             potDiv.appendChild(ingredientDiv);
         });
     }
