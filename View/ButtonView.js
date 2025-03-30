@@ -1,6 +1,9 @@
+import ColorTester from '../Model/ColorTester.js';
+
 export default class ButtonView {
     constructor(controller) {
         this.controller = controller;
+        this.colorTester = new ColorTester(controller);
     }
 
     drawButtonContainer() {
@@ -36,6 +39,39 @@ export default class ButtonView {
 
         // Create container for mixed pots (initially empty)
         this.createMixedPotsContainer(rightContainer);
+        
+        // Create color tester container (below mixed pots)
+        this.createColorTesterContainer(rightContainer);
+    }
+    
+    // Create the color tester container
+    createColorTesterContainer(parentContainer) {
+        // Remove existing tester if any
+        const existingTester = document.getElementById("colorTesterContainer");
+        if (existingTester) {
+            existingTester.remove();
+        }
+        
+        // Create container for the color tester
+        const testerContainer = document.createElement("div");
+        testerContainer.id = "colorTesterContainer";
+        testerContainer.className = "color-tester-section";
+        
+        // Add to parent container after mixed pots container
+        const mixedPotsContainer = document.getElementById("mixedPotsContainer");
+        if (mixedPotsContainer) {
+            parentContainer.insertBefore(testerContainer, mixedPotsContainer.nextSibling);
+        } else {
+            const buttonContainer = document.getElementById("addPotButtonContainer");
+            if (buttonContainer) {
+                parentContainer.insertBefore(testerContainer, buttonContainer.nextSibling);
+            } else {
+                parentContainer.appendChild(testerContainer);
+            }
+        }
+        
+        // Draw the grid in the container
+        this.colorTester.drawGrid(testerContainer);
     }
 
     // Method to create the mixed pots container
@@ -85,6 +121,23 @@ export default class ButtonView {
         const mixedPot = document.createElement("div");
         mixedPot.className = "mixed-result-pot";
         mixedPot.style.backgroundColor = mixedColor;
+        
+        // Make it draggable
+        mixedPot.draggable = true;
+        
+        // Set up drag events
+        mixedPot.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', mixedColor);
+            e.dataTransfer.effectAllowed = 'copy';
+            
+            // Add a visual indicator for dragging
+            mixedPot.style.opacity = '0.6';
+        });
+        
+        mixedPot.addEventListener('dragend', () => {
+            // Reset visual style
+            mixedPot.style.opacity = '1';
+        });
         
         // Add label to show the HSL value
         const hslLabel = document.createElement("div");

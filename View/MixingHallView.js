@@ -43,7 +43,7 @@ export default class MixingHallView {
         middleArea.id = "machineAreaContainer";
         mainContainer.appendChild(middleArea);
 
-        // Create right area for buttons (40%)
+        // Create right area for buttons and color grid (40%)
         let rightArea = document.createElement("div");
         rightArea.id = "rightContainer";
         mainContainer.appendChild(rightArea);

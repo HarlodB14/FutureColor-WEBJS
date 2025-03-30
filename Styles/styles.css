@@ -1,50 +1,81 @@
-/* Global Styles */
-body {
+/* ============ GLOBAL STYLES ============ */
+:root {
+    /* Main colors */
+    --primary-color: #4CAF50;
+    --primary-dark: #3e8e41;
+    --secondary-color: #2196F3;
+    --secondary-dark: #0b7dda;
+    --danger-color: #e74c3c;
+    --danger-dark: #c0392b;
+    --clear-color: #f44336;
+    --clear-dark: #d32f2f;
+    --border-color: #ccc;
+    --bg-light: #f5f5f5;
+    --text-dark: #333;
+    --text-light: white;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 0 20px rgba(0, 0, 0, 0.2);
+    
+    /* Border radius */
+    --radius-sm: 3px;
+    --radius-md: 5px;
+    --radius-lg: 10px;
+  }
+  
+  body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-}
-
-h1 {
+  }
+  
+  h1, h3, h4 {
+    color: var(--text-dark);
     text-align: center;
     margin: 10px 0;
-}
-
-/* Main Layout Styles */
-#mainContainer {
+  }
+  
+  button {
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  
+  /* ============ LAYOUT STYLES ============ */
+  #mainContainer {
     display: flex;
     width: 100%;
     min-height: 100vh;
     position: relative;
-}
-
-/* IMPORTANT: Further increased top margin to avoid overlap */
-#mixingAreaContainer {
+  }
+  
+  #mixingAreaContainer {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
     gap: 40px;
-    margin-top: 180px; /* Increased significantly to avoid overlap */
+    margin-top: 180px;
     padding: 20px;
     width: 40%;
-    min-height: calc(100vh - 180px); /* Adjusted height to account for top margin */
+    min-height: calc(100vh - 180px);
     box-sizing: border-box;
-}
-
-#machineAreaContainer {
+  }
+  
+  #machineAreaContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
-    background-color: transparent;
     width: 20%;
     min-height: 100vh;
     box-sizing: border-box;
-    border-left: 1px dashed #ccc;
-    border-right: 1px dashed #ccc;
-}
-
-#rightContainer {
+    border-left: 1px dashed var(--border-color);
+    border-right: 1px dashed var(--border-color);
+  }
+  
+  #rightContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -53,61 +84,144 @@ h1 {
     width: 40%;
     min-height: 100vh;
     box-sizing: border-box;
-}
-
-/* Button Styles */
-#addPotButtonContainer {
+  }
+  
+  /* ============ COMMON COMPONENT STYLES ============ */
+  .action-button, .grid-button {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    font-weight: bold;
+  }
+  
+  .action-button {
+    padding: 15px 20px;
+    font-size: 18px;
+    width: 250px;
+    margin-bottom: 10px;
+  }
+  
+  .action-button:hover, .grid-button:hover {
+    background-color: var(--primary-dark);
+    box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3);
+  }
+  
+  .grid-button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  
+  .clear-button {
+    background-color: var(--clear-color);
+  }
+  
+  .clear-button:hover {
+    background-color: var(--clear-dark);
+  }
+  
+  .apply-button {
+    background-color: var(--secondary-color);
+  }
+  
+  .apply-button:hover {
+    background-color: var(--secondary-dark);
+  }
+  
+  .remove-button {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--danger-color);
+    color: var(--text-light);
+    font-weight: bold;
+    border: 2px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+  }
+  
+  .remove-button:hover {
+    background-color: var(--danger-dark);
+    transform: scale(1.1);
+  }
+  
+  .mixing-machine .remove-button {
+    top: 10px;
+    right: 10px;
+  }
+  
+  .pot-remove-button {
+    top: -10px;
+    right: -10px;
+  }
+  
+  /* Error messages */
+  .error-message, .mixing-pot-error, .machine-error {
+    color: var(--clear-color);
+    font-size: 12px;
+  }
+  
+  .mixing-pot-error, .machine-error {
+    position: absolute;
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .mixing-pot-error {
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .machine-error {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  
+  /* ============ BUTTON CONTAINER ============ */
+  #addPotButtonContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 15px;
     margin-top: 20px;
-}
-
-.action-button {
-    padding: 15px 20px;
-    font-size: 18px;
-    cursor: pointer;
-    border: none;
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 5px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    margin-bottom: 10px;
-    display: block;
-    width: 250px;
-    transition: all 0.3s ease;
-}
-
-.action-button:hover {
-    background-color: #3e8e41;
-    box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3);
-}
-
-/* Mixing Machine Styles */
-#mixingMachinesContainer {
+  }
+  
+  /* ============ MIXING MACHINE STYLES ============ */
+  #mixingMachinesContainer {
     display: flex;
     flex-direction: column;
     gap: 30px;
     padding: 20px;
     background-color: rgba(255,255,255,0.8);
-    border-radius: 10px;
-    border: 2px solid #333;
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--text-dark);
+    box-shadow: var(--shadow-lg);
     width: 90%;
     max-width: 300px;
     overflow-y: auto;
     max-height: 90vh;
-}
-
-.mixing-machine {
+  }
+  
+  .mixing-machine {
     width: 100%;
     height: 250px;
     background-color: #f0f0f0;
     border: 3px solid #555;
-    border-radius: 5px;
+    border-radius: var(--radius-md);
     position: relative;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -116,37 +230,30 @@ h1 {
     padding: 15px;
     box-sizing: border-box;
     margin-bottom: 30px;
-}
-
-.machine-label {
+  }
+  
+  .machine-label {
     width: 100%;
     text-align: center;
     font-weight: bold;
     font-size: 18px;
-    color: #333;
+    color: var(--text-dark);
     padding: 5px;
     background-color: rgba(200,200,200,0.5);
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     margin-bottom: 10px;
-}
-
-.status-light {
-    width: 15px;
-    height: 15px;
-    background-color: #4CAF50;
-    border-radius: 50%;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    box-shadow: 0 0 5px rgba(0,0,0,0.3);
-}
-
-.machine-drop-zone {
+  }
+  
+  .status-light {
+    display: none; /* Hide the original status light */
+  }
+  
+  .machine-drop-zone {
     width: 90%;
     height: 150px;
     background-color: rgba(200,200,200,0.5);
     border: 2px dashed #666;
-    border-radius: 5px;
+    border-radius: var(--radius-md);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -156,81 +263,90 @@ h1 {
     padding: 10px;
     box-sizing: border-box;
     margin-top: auto;
-}
-
-.machine-drop-zone.dragover {
+  }
+  
+  .machine-drop-zone.dragover {
     background-color: rgba(180,180,255,0.5);
-}
-
-/* Ingredient Form Styles - Balanced Size and Readability */
-.formContainer {
+  }
+  
+  .machine-drop-zone.pot-loaded {
+    background-color: rgba(180, 220, 180, 0.3);
+    border-style: solid;
+  }
+  
+  /* ============ INGREDIENT FORM STYLES ============ */
+  .formContainer {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 999;
     padding: 8px;
-    background-color: #f5f5f5;
+    background-color: var(--bg-light);
     border-radius: 0 0 10px 0;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-    max-width: 300px; /* Increased width for color picker */
-}
-
-.ingredient-form {
+    box-shadow: var(--shadow-md);
+    max-width: 300px;
+  }
+  
+  .ingredient-form {
     display: flex;
     flex-direction: column;
-    gap: 3px; /* Reduced gap */
-}
-
-.ingredient-form label {
+    gap: 3px;
+  }
+  
+  .ingredient-form label {
     font-weight: bold;
-    margin-bottom: 1px; /* Reduced margin */
-    font-size: 13px; /* Keep readable font size */
-    line-height: 1.2; /* Compact line height */
-}
-
-.ingredient-form input,
-.ingredient-form select {
-    padding: 2px 4px; /* Reduced vertical padding */
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    font-size: 13px; /* Keep readable font size */
-    height: 24px; /* Reduced height */
-}
-
-.ingredient-form button {
-    background-color: #4CAF50;
+    margin-bottom: 1px;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+  
+  .ingredient-form input,
+  .ingredient-form select {
+    padding: 2px 4px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    height: 24px;
+  }
+  
+  .ingredient-form button {
+    background-color: var(--primary-color);
     color: white;
-    border: none;
-    padding: 4px 6px; /* Reduced padding */
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 5px; /* Reduced margin */
-    font-size: 13px; /* Keep readable font size */
-    height: 26px; /* Reduced height */
-}
-
-#weatherText {
-    margin-top: 5px; /* Reduced margin */
-    font-size: 12px; /* Slightly smaller */
+    padding: 4px 6px;
+    border-radius: var(--radius-md);
+    margin-top: 5px;
+    font-size: 13px;
+    height: 26px;
+  }
+  
+  #weatherText {
+    margin-top: 5px;
+    font-size: 12px;
     color: #555;
-    line-height: 1.2; /* Compact line height */
-}
-
-/* Mixing Pots Styles */
-#mixingPotsContainer {
+    line-height: 1.2;
+  }
+  
+  /* ============ MIXING POTS & INGREDIENTS STYLES ============ */
+  #mixingPotsContainer, #ingredientsContainer {
     display: flex;
     flex-direction: column;
     gap: 20px;
     padding: 10px;
     background-color: transparent;
-    border-radius: 10px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
     max-width: 120px;
-}
-
-.mixing-pot {
-    width: 80px;
-    height: 100px;
+  }
+  
+  .mixing-pot-container {
+    position: relative;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .mixing-pot, .mixing-pot-in-machine {
     border: 10px solid black;
     border-top: none;
     border-radius: 0 0 40px 40px;
@@ -238,25 +354,27 @@ h1 {
     justify-content: center;
     align-items: flex-end;
     position: relative;
-    cursor: move;
-    padding-bottom: 10px;
     overflow: hidden;
     flex-wrap: wrap;
-}
-
-/* Ingredients Container Styles */
-#ingredientsContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
+  }
+  
+  .mixing-pot {
+    width: 80px;
+    height: 100px;
+    cursor: move;
+    padding-bottom: 10px;
+    margin: 0 auto;
+  }
+  
+  .mixing-pot-in-machine {
+    width: 60px;
+    height: 80px;
+    padding-bottom: 8px;
+    margin: 0 auto;
     background-color: transparent;
-    border-radius: 10px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    max-width: 120px;
-}
-
-.ingredient {
+  }
+  
+  .ingredient {
     margin: 5px auto;
     border: 2px solid black;
     text-align: center;
@@ -267,10 +385,38 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-/* Tooltip Styles */
-.mixing-speed-tooltip {
+  }
+  
+  /* Ingredient structure styles */
+  .grain {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+  }
+  
+  .rough-grain {
+    width: 60px;
+    height: 60px;
+    border-radius: 90%;
+    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.2);
+  }
+  
+  .smooth {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+  }
+  
+  .slimey {
+    width: 60px;
+    height: 30px;
+    border-radius: 60%;
+    box-shadow: 5px 10px 20px rgba(0, 255, 0, 0.6);
+    filter: blur(2px);
+  }
+  
+  /* Tooltips */
+  .mixing-speed-tooltip {
     position: absolute;
     top: -30px;
     left: 50%;
@@ -278,219 +424,60 @@ h1 {
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
     padding: 5px 8px;
-    border-radius: 4px;
+    border-radius: var(--radius-md);
     font-size: 12px;
     pointer-events: none;
     white-space: nowrap;
     z-index: 1000;
-}
-
-/* Error Message Styles */
-.mixing-pot-error {
-    position: absolute;
-    top: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(255, 0, 0, 0.8);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.error-message {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-/* Speed Label Styles */
-.pot-mixing-speed {
+  }
+  
+  .pot-mixing-speed {
     position: absolute;
     top: -25px;
     right: 0;
     background-color: rgba(0,0,0,0.7);
     color: white;
     padding: 3px 6px;
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     font-size: 10px;
     z-index: 10;
-}
-
-/* Grain Structure Styles */
-.grain {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-}
-
-.rough-grain {
-    width: 60px;
-    height: 60px;
-    border-radius: 90%;
-    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.2);
-}
-
-.smooth {
-    width: 50px;
-    height: 50px;
-    border-radius: 5px;
-}
-
-.slimey {
-    width: 60px;
-    height: 30px;
-    border-radius: 60%;
-    box-shadow: 5px 10px 20px rgba(0, 255, 0, 0.6);
-    filter: blur(2px);
-}
-
-/* Color Input Container and Color Picker Styles */
-.color-input-container {
+  }
+  
+  /* ============ COLOR INPUT & PICKER ============ */
+  .color-input-container {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 5px;
-}
-
-.color-input-container input[type="text"] {
+  }
+  
+  .color-input-container input[type="text"] {
     flex: 1;
-}
-
-/* Color Picker Styling */
-.color-picker {
+  }
+  
+  .color-picker {
     height: 24px;
     width: 30px;
     padding: 0;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     background: none;
-}
-
-/* Make the color picker more compact without ugly default border */
-input[type="color"]::-webkit-color-swatch-wrapper {
+  }
+  
+  /* Color picker styling fixes */
+  input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch {
+  }
+  
+  input[type="color"]::-webkit-color-swatch,
+  input[type="color"]::-moz-color-swatch {
     border: none;
     border-radius: 2px;
-}
-
-/* Firefox specific styles */
-input[type="color"]::-moz-color-swatch {
-    border: none;
-    border-radius: 2px;
-}
-
-/* Pot in machine styling - simplified without animations */
-.mixing-pot-in-machine {
-    width: 60px;
-    height: 80px;
-    border: 8px solid black;
-    border-top: none;
-    border-radius: 0 0 30px 30px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    position: relative;
-    padding-bottom: 8px;
-    overflow: hidden;
-    flex-wrap: wrap;
-    margin: 0 auto;
-}
-
-/* Machine with pot loaded */
-.machine-drop-zone.pot-loaded {
-    background-color: rgba(180, 220, 180, 0.3);
-    border-style: solid;
-}
-
-/* Error message in machine */
-.machine-error {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(255, 0, 0, 0.8);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 1000;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-/* Remove Button Styles */
-.remove-button {
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: #e74c3c;
-    color: white;
-    font-weight: bold;
-    border: 2px solid white;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s ease;
-    z-index: 10;
-}
-
-.remove-button:hover {
-    background-color: #c0392b;
-    transform: scale(1.1);
-}
-
-/* Machine remove button - positioned in the top right corner */
-.mixing-machine .remove-button {
-    top: 10px;
-    right: 10px;
-}
-
-/* Convert the existing status light to a remove button */
-.status-light {
-    display: none; /* Hide the original status light */
-}
-
-/* Mixing pot remove button styles */
-.mixing-pot-container {
-    position: relative;
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.pot-remove-button {
-    top: -10px;
-    right: -10px;
-}
-
-/* Adjust the mixing pot properties to work with the new container */
-.mixing-pot {
-    margin: 0 auto;
-}
-
-/* Mixing Animation Styles */
-.mixing-pot-in-machine {
-    position: relative;
-    overflow: hidden;
-    background-color: transparent;
-}
-
-/* Container for ingredients during mixing */
-.ingredients-container {
+  }
+  
+  /* ============ MIXING ANIMATION STYLES ============ */
+  .ingredients-container {
     width: 100%;
     height: 100%;
     display: flex;
@@ -498,91 +485,85 @@ input[type="color"]::-moz-color-swatch {
     justify-content: center;
     align-items: center;
     transition: opacity 0.5s ease;
-}
-
-/* Progress bar container */
-.mixing-progress-container {
+  }
+  
+  .mixing-progress-container {
     position: absolute;
     width: 10px;
     height: 90%;
     background-color: rgba(200, 200, 200, 0.3);
-    border-radius: 5px;
+    border-radius: var(--radius-md);
     right: 5px;
     top: 5%;
     overflow: hidden;
-}
-
-/* Progress bar */
-.mixing-progress-bar {
+  }
+  
+  .mixing-progress-bar {
     position: absolute;
     width: 100%;
     height: 0%; /* Starts at 0%, will be animated to 100% */
     bottom: 0;
-    background-color: #4CAF50;
+    background-color: var(--primary-color);
     transition: height 0.2s linear;
-}
-
-/* Style for pot that is currently mixing */
-.mixing-in-progress {
+  }
+  
+  .mixing-in-progress {
     animation: mixing-shake 0.5s infinite;
-}
-
-/* Shake animation for mixing */
-@keyframes mixing-shake {
+  }
+  
+  @keyframes mixing-shake {
     0% { transform: translateX(0); }
     25% { transform: translateX(-2px) rotate(-1deg); }
     50% { transform: translateX(0); }
     75% { transform: translateX(2px) rotate(1deg); }
     100% { transform: translateX(0); }
-}
-
-/* Style for finished mixed pot */
-.finished-mixing {
+  }
+  
+  .finished-mixing {
     transition: background-color 0.5s ease;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-/* Label for finished pot */
-.finished-mixing-label {
+  }
+  
+  .finished-mixing-label {
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
     padding: 3px 6px;
-    border-radius: 3px;
+    border-radius: var(--radius-sm);
     font-size: 12px;
     position: absolute;
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
-}
-
-/* Mixed Pots Container */
-.mixed-pots-container {
+  }
+  
+  /* ============ MIXED POTS CONTAINER ============ */
+  .mixed-pots-container, .color-tester-section {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 15px;
     padding: 15px;
-    margin-bottom: 20px;
     background-color: rgba(240, 240, 240, 0.7);
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
     max-width: 90%;
-    margin: 0 auto 20px auto;
-}
-
-.mixed-pots-container h3 {
+    margin: 20px auto;
+    overflow: hidden;
+  }
+  
+  .mixed-pots-container h3, 
+  .color-tester-header {
     width: 100%;
     text-align: center;
     margin-top: 0;
     margin-bottom: 15px;
-    color: #333;
+    color: var(--text-dark);
     font-size: 18px;
-}
-
-/* Mixed Result Pot */
-.mixed-result-pot {
+  }
+  
+  .mixed-result-pot {
     width: 60px;
     height: 80px;
     border: 8px solid black;
@@ -593,14 +574,36 @@ input[type="color"]::-moz-color-swatch {
     box-shadow: 0 3px 6px rgba(0,0,0,0.2);
     margin: 5px;
     transition: transform 0.2s ease;
-}
-
-.mixed-result-pot:hover {
+    cursor: grab;
+  }
+  
+  .mixed-result-pot:hover {
     transform: scale(1.05);
-}
-
-/* HSL Value Label */
-.hsl-value-label {
+  }
+  
+  .mixed-result-pot:active {
+    cursor: grabbing;
+  }
+  
+  .mixed-result-pot::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  .mixed-result-pot:hover::after {
+    opacity: 1;
+  }
+  
+  .hsl-value-label {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -612,8 +615,189 @@ input[type="color"]::-moz-color-swatch {
     text-align: center;
     opacity: 0;
     transition: opacity 0.3s ease;
-}
-
-.mixed-result-pot:hover .hsl-value-label {
+  }
+  
+  .mixed-result-pot:hover .hsl-value-label {
     opacity: 1;
-}
+  }
+  
+  /* ============ COLOR TESTER GRID STYLES ============ */
+  .color-grid-container {
+    display: grid;
+    gap: 3px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+    padding: 5px;
+    box-sizing: border-box;
+    background-color: #f8f8f8;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    height: auto;
+    min-height: 200px;
+  }
+  
+  .grid-cell {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    min-height: 20px;
+    min-width: 20px;
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .grid-cell:hover {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+  }
+  
+  .grid-cell.dragover {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    transform: scale(1.05);
+  }
+  
+  /* Grid dimension-specific styling */
+  .color-grid-container[data-cols="6"] .grid-cell,
+  .color-grid-container[data-cols="7"] .grid-cell {
+    min-height: 18px;
+  }
+  
+  .color-grid-container[data-cols="8"] .grid-cell,
+  .color-grid-container[data-cols="9"] .grid-cell,
+  .color-grid-container[data-cols="10"] .grid-cell {
+    min-height: 15px;
+  }
+  
+  .color-grid-container[data-rows="6"],
+  .color-grid-container[data-rows="7"],
+  .color-grid-container[data-rows="8"],
+  .color-grid-container[data-rows="9"],
+  .color-grid-container[data-rows="10"] {
+    min-height: 280px;
+  }
+  
+  .grid-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+  
+  .grid-input-label {
+    font-size: 14px;
+    margin-right: 2px;
+  }
+  
+  .grid-size-input {
+    width: 35px;
+    text-align: center;
+    padding: 3px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    margin-right: 5px;
+  }
+  
+  /* ============ COLOR INFO MODAL ============ */
+  .color-info-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    background-color: white;
+    padding: 15px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-md);
+    width: 250px;
+  }
+  
+  .modal-close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .color-swatch {
+    width: 100%;
+    height: 50px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 10px;
+  }
+  
+  .hsl-value {
+    font-size: 14px;
+  }
+  
+  .triad-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+  }
+  
+  .triad-color-block {
+    text-align: center;
+    width: 30%;
+  }
+  
+  .triad-original-color {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-sm);
+    z-index: 1;
+  }
+  
+  .triad-swatch {
+    height: 30px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 5px;
+  }
+  
+  .triad-label {
+    font-size: 12px;
+  }
+  
+  /* ============ RESPONSIVE STYLES ============ */
+  @media (max-width: 768px) {
+    #mainContainer {
+      flex-direction: column;
+    }
+    
+    #mixingAreaContainer,
+    #machineAreaContainer,
+    #rightContainer {
+      width: 100%;
+      min-height: auto;
+      border: none;
+    }
+    
+    #mixingAreaContainer {
+      margin-top: 150px;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .action-button {
+      width: 200px;
+    }
+    
+    .color-tester-section,
+    .mixed-pots-container {
+      max-width: 95%;
+      padding: 5px;
+    }
+    
+    .grid-controls {
+      gap: 5px;
+    }
+    
+    .grid-button {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+  }
