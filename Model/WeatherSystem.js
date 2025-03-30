@@ -9,7 +9,13 @@ export default class WeatherSystem {
         this.cityName = "London"; // Default city
         
         // Start with initial weather fetch
-        this.fetchWeatherData();
+        this.fetchWeatherData().catch(error => {
+            console.error("Error on initial weather fetch:", error);
+            // Set default values if initial fetch fails
+            this.currentWeather = "Clear";
+            this.currentTemperature = 20;
+            this.isPrecipitation = false;
+        });
         
         // Set up auto-refresh every 10 minutes
         setInterval(() => this.fetchWeatherData(), 600000);
@@ -61,7 +67,8 @@ export default class WeatherSystem {
     // Fetch coords for a city using the Geocoding API
     async fetchCityCoords() {
         try {
-            const geoApiUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${this.cityName}&limit=1&appid=${this.API_KEY}`;
+            const geoApiUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${this.cityName}&limit=1&appid=${this.API_KEY}`;
+            
             const response = await fetch(geoApiUrl);
             
             if (!response.ok) {
@@ -81,7 +88,11 @@ export default class WeatherSystem {
             }
         } catch (error) {
             console.error('Error getting city coordinates:', error);
-            throw error;
+            // Return London coordinates as fallback
+            return {
+                lat: 51.5074,
+                lon: -0.1278
+            };
         }
     }
 
@@ -93,6 +104,7 @@ export default class WeatherSystem {
             
             // Then fetch the weather using those coordinates
             const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${coords.lat}&lon=${coords.lon}&units=metric&appid=${this.API_KEY}`;
+            
             const response = await fetch(weatherApiUrl);
             
             if (!response.ok) {
@@ -117,6 +129,14 @@ export default class WeatherSystem {
             }
         } catch (error) {
             console.error('Error fetching weather data:', error);
+            
+            // If this is the first fetch (no temperature set yet), set defaults
+            if (this.currentTemperature === null) {
+                this.currentWeather = "Clear";
+                this.currentTemperature = 20;
+                this.isPrecipitation = false;
+            }
+            
             throw error;
         }
     }

@@ -10,13 +10,6 @@ export default class MixingHallController {
         this.weatherSystem = new WeatherSystem();
         this.view = new MixingHallView(this);
         
-        // First draw the layout, then the components
-        this.view.drawIngredientForm();
-        this.view.drawMixingPots(this.mixingHall.mixingPots);
-        this.view.drawButtonContainer();
-        this.view.drawMixingMachines(this.mixingHall.mixMachines);
-        this.view.drawAddPotButton();
-        
         // Set up a timer to check for weather updates every 10 seconds
         setInterval(() => this.updateWeatherDisplay(), 10000);
         
@@ -30,11 +23,17 @@ export default class MixingHallController {
     
     // Update the weather display in the view with current data
     updateWeatherDisplay() {
-        const temperature = this.weatherSystem.getTemperature();
-        const isPrecipitation = this.weatherSystem.hasPrecipitation();
-        
-        // Update the view with the latest weather data
-        this.view.updateWeatherText(temperature, isPrecipitation);
+        try {
+            const temperature = this.weatherSystem.getTemperature();
+            const isPrecipitation = this.weatherSystem.hasPrecipitation();
+            
+            // Update the view with the latest weather data
+            this.view.updateWeatherText(temperature, isPrecipitation);
+        } catch (error) {
+            console.error("Error updating weather display:", error);
+            // Update with default values to prevent being stuck on loading
+            this.view.updateWeatherText(20, false);
+        }
     }
 
     mouseMove(e) {
