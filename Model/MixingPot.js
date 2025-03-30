@@ -1,22 +1,25 @@
+import MixingPotStatus from "../Enums/MixingPotStatus.js";
+
 export default class MixingPot {
-    contents = [];
-    MixingPot(id, contents, status) {
-        this.id = id;
-        this.contents = contents;
-        this.status = status;
+    constructor() {
+        this.id = null;
+        this.contents = [];
+        this.status = MixingPotStatus.EMPTY;
     }
 
     addIngredient(ingredient) {
         this.contents.push(ingredient);
+        this.status = MixingPotStatus.FILLED;
     }
 
-    getcontents() {
+    getContents() {
         return this.contents;
     }
 
     getStatus() {
         return this.status;
     }
+    
     setStatus(status) {
         this.status = status;
     }
@@ -29,4 +32,13 @@ export default class MixingPot {
         this.id = id;
     }
 
+    isEmpty() {
+        return this.contents.length === 0;
+    }
+    
+    // Clear the pot contents
+    clear() {
+        this.contents = [];
+        this.status = MixingPotStatus.EMPTY;
+    }
 }

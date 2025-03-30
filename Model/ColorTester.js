@@ -87,7 +87,7 @@ export default class ColorTester {
     
         // Create grid header
         const gridHeader = document.createElement('h3');
-        gridHeader.textContent = 'Color Tester';
+        gridHeader.textContent = 'Kleurtester';
         gridHeader.className = 'color-tester-header';
         container.appendChild(gridHeader);
         
@@ -155,10 +155,7 @@ export default class ColorTester {
         // Create grid container with data attributes for rows and cols
         const gridContainer = document.createElement('div');
         gridContainer.className = 'color-grid-container';
-        gridContainer.style.gridTemplateColumns = `repeat(${this.cols}, 1fr)`;
-        gridContainer.style.gridTemplateRows = `repeat(${this.rows}, 1fr)`;
-        
-        // Add data attributes for row and column count to help with CSS selectors
+        // Set grid template in CSS class instead of inline styles
         gridContainer.setAttribute('data-rows', this.rows);
         gridContainer.setAttribute('data-cols', this.cols);
     
@@ -171,7 +168,7 @@ export default class ColorTester {
                 cell.setAttribute('data-col', j);
                 
                 if (this.grid[i][j]) {
-                    cell.style.backgroundColor = this.grid[i][j];
+                    cell.style.backgroundColor = this.grid[i][j]; // This is acceptable as it's dynamic content
                     
                     // Add click handler to show color info for existing colors
                     cell.onclick = () => {
@@ -203,7 +200,7 @@ export default class ColorTester {
                         this.grid[i][j] = color;
                         
                         // Update the cell appearance
-                        cell.style.backgroundColor = color;
+                        cell.style.backgroundColor = color; // Dynamic content, acceptable inline style
                         
                         // Add click handler to show color info
                         cell.onclick = () => {
@@ -229,7 +226,7 @@ export default class ColorTester {
         if (!colorModal) {
             colorModal = document.createElement('div');
             colorModal.id = 'colorInfoModal';
-            colorModal.className = 'color-info-modal';
+            colorModal.className = 'color-info-modal color-info-modal-fixed';
             
             document.body.appendChild(colorModal);
         }
@@ -245,13 +242,13 @@ export default class ColorTester {
         
         // Create title
         const title = document.createElement('h3');
-        title.textContent = 'Color Information';
+        title.textContent = 'Kleurinformatie';
         title.className = 'modal-title';
         
         // Create the color swatch
         const swatch = document.createElement('div');
         swatch.className = 'color-swatch';
-        swatch.style.backgroundColor = `hsl(${color.h}, ${color.s}%, ${color.l}%)`;
+        swatch.style.backgroundColor = `hsl(${color.h}, ${color.s}%, ${color.l}%)`; // Dynamic content
         
         // Create the HSL value display
         const hslValue = document.createElement('p');
@@ -280,11 +277,21 @@ export default class ColorTester {
             
             const triadSwatch = document.createElement('div');
             triadSwatch.className = 'triad-swatch';
-            triadSwatch.style.backgroundColor = `hsl(${c.h}, ${c.s}%, ${c.l}%)`;
+            triadSwatch.style.backgroundColor = `hsl(${c.h}, ${c.s}%, ${c.l}%)`; // Dynamic content
             
             const triadLabel = document.createElement('div');
             triadLabel.className = 'triad-label';
-            triadLabel.textContent = `${c.h}°`;
+            
+            // For the triad colors (not the original), show HSL values
+            if (index !== 1) {
+                const hslText = document.createElement('div');
+                hslText.textContent = `HSL: ${c.h}°, ${c.s}%, ${c.l}%`;
+                hslText.className = 'triad-hsl-text';
+                
+                triadLabel.appendChild(hslText);
+            } else {
+                triadLabel.textContent = `${c.h}°`;
+            }
             
             colorBlock.appendChild(triadSwatch);
             colorBlock.appendChild(triadLabel);
@@ -299,21 +306,18 @@ export default class ColorTester {
         colorModal.appendChild(document.createElement('hr'));
         
         const triadTitle = document.createElement('h4');
-        triadTitle.textContent = 'Triad Colors';
+        triadTitle.textContent = 'Triade Kleuren';
         triadTitle.className = 'triad-title';
         colorModal.appendChild(triadTitle);
         
         colorModal.appendChild(triadContainer);
         
-        // Position the modal near the element
+        // Calculate position based on element location (but let CSS handle the fixed positioning)
         const rect = element.getBoundingClientRect();
         
-        // Calculate modal position
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
-        
-        colorModal.style.top = `${rect.top + scrollTop + rect.height + 10}px`;
-        colorModal.style.left = `${rect.left + scrollLeft + (rect.width/2) - 125}px`;
+        // Set the modal's position relative to the grid cell
+        const leftPosition = Math.max(10, Math.min(window.innerWidth - 300, rect.left));
+        colorModal.setAttribute('data-left', leftPosition);
         
         // Show the modal
         colorModal.style.display = 'block';

@@ -88,7 +88,7 @@ export default class ButtonView {
         
         // Add heading
         const heading = document.createElement("h3");
-        heading.textContent = "Mixed Colors";
+        heading.textContent = "Gemengde Kleuren";
         mixedPotsContainer.appendChild(heading);
         
         // Add to parent container after the button container

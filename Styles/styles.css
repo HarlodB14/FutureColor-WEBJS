@@ -801,3 +801,103 @@
       font-size: 12px;
     }
   }
+
+  /* ============ COLOR TESTER GRID UPDATES ============ */
+.color-grid-container {
+    display: grid;
+    gap: 3px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+    padding: 5px;
+    box-sizing: border-box;
+    background-color: #f8f8f8;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    height: auto;
+    min-height: 200px;
+  }
+  
+  /* Grid template columns based on data attributes */
+  .color-grid-container[data-cols="1"] { grid-template-columns: repeat(1, 1fr); }
+  .color-grid-container[data-cols="2"] { grid-template-columns: repeat(2, 1fr); }
+  .color-grid-container[data-cols="3"] { grid-template-columns: repeat(3, 1fr); }
+  .color-grid-container[data-cols="4"] { grid-template-columns: repeat(4, 1fr); }
+  .color-grid-container[data-cols="5"] { grid-template-columns: repeat(5, 1fr); }
+  .color-grid-container[data-cols="6"] { grid-template-columns: repeat(6, 1fr); }
+  .color-grid-container[data-cols="7"] { grid-template-columns: repeat(7, 1fr); }
+  .color-grid-container[data-cols="8"] { grid-template-columns: repeat(8, 1fr); }
+  .color-grid-container[data-cols="9"] { grid-template-columns: repeat(9, 1fr); }
+  .color-grid-container[data-cols="10"] { grid-template-columns: repeat(10, 1fr); }
+  
+  /* Grid template rows based on data attributes */
+  .color-grid-container[data-rows="1"] { grid-template-rows: repeat(1, 1fr); }
+  .color-grid-container[data-rows="2"] { grid-template-rows: repeat(2, 1fr); }
+  .color-grid-container[data-rows="3"] { grid-template-rows: repeat(3, 1fr); }
+  .color-grid-container[data-rows="4"] { grid-template-rows: repeat(4, 1fr); }
+  .color-grid-container[data-rows="5"] { grid-template-rows: repeat(5, 1fr); }
+  .color-grid-container[data-rows="6"] { grid-template-rows: repeat(6, 1fr); }
+  .color-grid-container[data-rows="7"] { grid-template-rows: repeat(7, 1fr); }
+  .color-grid-container[data-rows="8"] { grid-template-rows: repeat(8, 1fr); }
+  .color-grid-container[data-rows="9"] { grid-template-rows: repeat(9, 1fr); }
+  .color-grid-container[data-rows="10"] { grid-template-rows: repeat(10, 1fr); }
+  
+  /* ============ COLOR INFO MODAL UPDATES ============ */
+  .color-info-modal-fixed {
+    position: fixed;
+    top: 100px;
+    z-index: 9999;
+    max-width: 280px;
+    max-height: 80vh;
+    overflow-y: auto;
+    left: 10px; /* Default, will be overridden by JavaScript */
+  }
+  
+  .color-info-modal-fixed:before {
+    content: attr(data-left);
+    display: none; /* Hidden, just using for data storage */
+  }
+  
+  .color-info-modal-fixed[data-left] {
+    left: attr(data-left px);
+  }
+  
+  .triad-hsl-text {
+    font-size: 10px;
+  }
+  
+  /* ============ WEATHER WARNING CONTAINER ============ */
+  #weatherWarningContainer {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    max-width: 300px;
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    font-weight: bold;
+  }
+  
+  /* ============ MACHINE DROP ZONE DISABLED STATE ============ */
+  .disabled-drop-zone {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-color: #ffaaaa;
+    color: #ff5555;
+  }
+  
+  /* ============ TIME INFO CONTAINER ============ */
+  .time-info-container {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    font-size: 10px;
+    color: white;
+    background: rgba(0,0,0,0.5);
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
