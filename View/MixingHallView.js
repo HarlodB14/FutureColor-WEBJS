@@ -7,6 +7,11 @@ export default class MixingHallView {
         this.controller = controller;
         this.mixingPotContents = new Map();
         
+        // Track whether a city update is in progress
+        this.cityUpdateInProgress = false;
+        // Store the most recent city name input by the user
+        this.pendingCityName = null;
+        
         // Initialize sub-views
         this.ingredientView = new IngredientView(controller, this.mixingPotContents);
         this.machineView = new MachineView(controller);
@@ -28,6 +33,152 @@ export default class MixingHallView {
         
         // Create weather warning container
         this.setupWeatherWarningContainer();
+        
+        // Add city input field
+        this.setupCityInput();
+    }
+    
+    // Set up the city input field for weather
+    setupCityInput() {
+        // Find the weatherText element to place the city input nearby
+        const weatherText = document.getElementById('weatherText');
+        if (!weatherText) return;
+        
+        // Create a container for the city input
+        const cityContainer = document.createElement('div');
+        cityContainer.id = 'cityInputContainer';
+        
+        // Create a label for the city input
+        const cityLabel = document.createElement('label');
+        cityLabel.textContent = 'Stad:';
+        cityLabel.htmlFor = 'cityInput';
+        
+        // Create the city input field
+        const cityInput = document.createElement('input');
+        cityInput.type = 'text';
+        cityInput.id = 'cityInput';
+        cityInput.value = this.controller.weatherSystem.cityName || 'Halifax'; // Default value from WeatherSystem
+        
+        // Create a button to apply the city change
+        const applyButton = document.createElement('button');
+        applyButton.textContent = 'Toepassen';
+        applyButton.type = 'button'; // Explicitly set type to button to prevent form submission
+        
+        // Add event listener to apply button - FIXED with stopPropagation
+        applyButton.addEventListener('click', (e) => {
+            // Prevent any form submission or event bubbling
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Get the input value
+            const cityName = cityInput.value.trim();
+            if (cityName) {
+                // Save the current city value
+                this.pendingCityName = cityName;
+                this.updateCity(cityName);
+            }
+        });
+        
+        // Add event listener for Enter key on input - FIXED with stopPropagation
+        cityInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                // Prevent any form submission or event bubbling
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Get the input value
+                const cityName = cityInput.value.trim();
+                if (cityName) {
+                    // Save the current city value
+                    this.pendingCityName = cityName;
+                    this.updateCity(cityName);
+                }
+                
+                return false; // Additional safeguard against event propagation
+            }
+        });
+        
+        // Add elements to the container
+        cityContainer.appendChild(cityLabel);
+        cityContainer.appendChild(cityInput);
+        cityContainer.appendChild(applyButton);
+        
+        // Insert the city container after the weather text, but OUTSIDE THE FORM
+        // Find the parent form that contains weatherText
+        const parentForm = weatherText.closest('form');
+        if (parentForm) {
+            // Insert after the form to prevent form validation issues
+            parentForm.parentNode.insertBefore(cityContainer, parentForm.nextSibling);
+        } else {
+            // Fallback: Insert after weather text
+            weatherText.parentNode.insertBefore(cityContainer, weatherText.nextSibling);
+        }
+        
+        // Add a status message element
+        const statusMessage = document.createElement('div');
+        statusMessage.id = 'cityUpdateStatus';
+        statusMessage.style.display = 'none';
+        
+        // Place the status message after the city container
+        if (parentForm) {
+            parentForm.parentNode.insertBefore(statusMessage, cityContainer.nextSibling);
+        } else {
+            weatherText.parentNode.insertBefore(statusMessage, cityContainer.nextSibling);
+        }
+    }
+    
+    // Update the city for weather data
+    updateCity(cityName) {
+        if (!cityName) return;
+        
+        // Mark update as in progress
+        this.cityUpdateInProgress = true;
+        
+        const statusMessage = document.getElementById('cityUpdateStatus');
+        if (statusMessage) {
+            statusMessage.textContent = `Weer bijwerken voor ${cityName}...`;
+            statusMessage.style.display = 'block';
+            // Remove any existing classes
+            statusMessage.className = '';
+        }
+        
+        // Call the WeatherSystem to update the city
+        this.controller.weatherSystem.setCity(cityName)
+            .then(weatherData => {
+                // Update weather information
+                this.updateWeatherText(weatherData.temperature, weatherData.isPrecipitation);
+                
+                if (statusMessage) {
+                    statusMessage.textContent = `Weer bijgewerkt voor ${cityName}`;
+                    statusMessage.classList.add('success');
+                    
+                    // Hide the message after 3 seconds
+                    setTimeout(() => {
+                        statusMessage.style.display = 'none';
+                    }, 3000);
+                }
+                
+                // Update is complete
+                this.cityUpdateInProgress = false;
+                // Don't clear pendingCityName so it's remembered for future updates
+            })
+            .catch(error => {
+                console.error('Fout bij het bijwerken van het weer:', error);
+                
+                if (statusMessage) {
+                    statusMessage.textContent = `Fout bij het ophalen van weer voor ${cityName}`;
+                    statusMessage.classList.add('error');
+                    
+                    // Hide the message after 3 seconds
+                    setTimeout(() => {
+                        statusMessage.style.display = 'none';
+                    }, 3000);
+                }
+                
+                // Update is complete
+                this.cityUpdateInProgress = false;
+                // Don't clear pendingCityName so the user's input is remembered
+            });
     }
     
     // Set up a container for weather condition warnings
@@ -38,18 +189,6 @@ export default class MixingHallView {
         // Create warning container
         const warningContainer = document.createElement('div');
         warningContainer.id = 'weatherWarningContainer';
-        warningContainer.style.position = 'fixed';
-        warningContainer.style.top = '10px';
-        warningContainer.style.right = '10px';
-        warningContainer.style.maxWidth = '300px';
-        warningContainer.style.backgroundColor = 'rgba(255, 0, 0, 0.8)';
-        warningContainer.style.color = 'white';
-        warningContainer.style.padding = '10px';
-        warningContainer.style.borderRadius = '5px';
-        warningContainer.style.zIndex = '1000';
-        warningContainer.style.display = 'none';
-        warningContainer.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
-        warningContainer.style.fontWeight = 'bold';
         
         mainContainer.appendChild(warningContainer);
     }
@@ -82,13 +221,6 @@ export default class MixingHallView {
         const errorDiv = document.createElement('div');
         errorDiv.id = 'temperatureRestrictionError';
         errorDiv.textContent = message;
-        errorDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.8)';
-        errorDiv.style.color = 'white';
-        errorDiv.style.padding = '10px';
-        errorDiv.style.borderRadius = '5px';
-        errorDiv.style.margin = '10px 0';
-        errorDiv.style.textAlign = 'center';
-        errorDiv.style.fontWeight = 'bold';
         
         // Insert at the top of the container
         machineContainer.insertBefore(errorDiv, machineContainer.firstChild);
@@ -113,21 +245,17 @@ export default class MixingHallView {
         // Create the switcher container
         const switcherContainer = document.createElement('div');
         switcherContainer.className = 'hall-switcher-container';
-        switcherContainer.style.marginBottom = '20px';
-        switcherContainer.style.textAlign = 'center';
         
         // Create the hall indicator
         const hallIndicator = document.createElement('div');
         hallIndicator.id = 'hallIndicator';
         hallIndicator.textContent = `Menghal #${this.controller.activeHallIndex + 1}`;
-        hallIndicator.style.fontWeight = 'bold';
-        hallIndicator.style.marginBottom = '10px';
         
         // Create the switch button
         const switchButton = document.createElement('button');
         switchButton.textContent = 'Wissel Menghal';
         switchButton.className = 'action-button';
-        switchButton.style.width = '180px';
+        switchButton.style.width = '180px'; // This one style is kept inline as it's specific to this button
         switchButton.addEventListener('click', () => {
             const newIndex = this.controller.switchMixingHall();
             hallIndicator.textContent = `Menghal #${newIndex + 1}`;
@@ -162,6 +290,41 @@ export default class MixingHallView {
         
         // Update weather effects display
         this.updateWeatherEffectsDisplay(temperature, isPrecipitation);
+        
+        // FIXED: Only update the city input if we're not in the middle of a user update
+        // and we don't have a pending city name
+        const cityInput = document.getElementById('cityInput');
+        if (cityInput) {
+            if (this.cityUpdateInProgress && this.pendingCityName) {
+                // If we are in the middle of an update, keep the user's input
+                cityInput.value = this.pendingCityName;
+            } else if (!this.cityUpdateInProgress && !this.pendingCityName) {
+                // Only reset if we're not in an update AND the user hasn't set a pending name
+                if (this.controller.weatherSystem.cityName) {
+                    cityInput.value = this.controller.weatherSystem.cityName;
+                }
+            } else if (this.pendingCityName) {
+                // If user has set a pending name but we're not in an update,
+                // still keep their input
+                cityInput.value = this.pendingCityName;
+            }
+        }
+    }
+    
+    // Update city input to match current city in WeatherSystem
+    // FIXED: Modified to respect pendingCityName
+    updateCityInput() {
+        const cityInput = document.getElementById('cityInput');
+        
+        if (cityInput) {
+            if (this.pendingCityName) {
+                // If there's a pending city name from user input, use that
+                cityInput.value = this.pendingCityName;
+            } else if (this.controller.weatherSystem.cityName) {
+                // Otherwise use the system's city name
+                cityInput.value = this.controller.weatherSystem.cityName;
+            }
+        }
     }
     
     // Update the display showing weather effects on mixing time
@@ -173,10 +336,6 @@ export default class MixingHallView {
             // Create new container if it doesn't exist
             effectsContainer = document.createElement('div');
             effectsContainer.id = 'weatherEffectsContainer';
-            effectsContainer.style.marginTop = '5px';
-            effectsContainer.style.fontSize = '11px';
-            effectsContainer.style.color = '#007BFF';
-            effectsContainer.style.fontWeight = 'bold';
             
             // Add it after the weather text
             const weatherText = document.getElementById('weatherText');

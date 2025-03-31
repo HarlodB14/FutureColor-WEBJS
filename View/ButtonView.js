@@ -4,6 +4,8 @@ export default class ButtonView {
     constructor(controller) {
         this.controller = controller;
         this.colorTester = new ColorTester(controller);
+        // Track mixed pots for removal functionality
+        this.mixedPots = [];
     }
 
     drawButtonContainer() {
@@ -105,6 +107,8 @@ export default class ButtonView {
         const existingContainer = document.getElementById("mixedPotsContainer");
         if (existingContainer) {
             existingContainer.remove();
+            // Clear the tracked pots array when removing the container
+            this.mixedPots = [];
         }
     }
 
@@ -116,6 +120,13 @@ export default class ButtonView {
             this.createMixedPotsContainer(document.getElementById("rightContainer"));
             mixedPotsContainer = document.getElementById("mixedPotsContainer");
         }
+        
+        // Create a container for the mixed pot and its remove button
+        const potContainer = document.createElement("div");
+        potContainer.className = "mixing-pot-container";
+        potContainer.style.position = "relative";
+        potContainer.style.display = "inline-block";
+        potContainer.style.margin = "5px";
         
         // Create mixed pot element
         const mixedPot = document.createElement("div");
@@ -145,8 +156,33 @@ export default class ButtonView {
         hslLabel.textContent = mixedColor;
         mixedPot.appendChild(hslLabel);
         
-        // Add to the container
-        mixedPotsContainer.appendChild(mixedPot);
+        // Create remove button
+        const removeButton = document.createElement("button");
+        removeButton.className = "remove-button pot-remove-button";
+        removeButton.textContent = "X";
+        removeButton.style.zIndex = "100";
+        
+        // Add click event to remove this mixed pot
+        removeButton.addEventListener("click", () => {
+            // Remove from DOM
+            potContainer.remove();
+            
+            // Remove from tracked array
+            const index = this.mixedPots.indexOf(potContainer);
+            if (index !== -1) {
+                this.mixedPots.splice(index, 1);
+            }
+        });
+        
+        // Add mixed pot and remove button to the container
+        potContainer.appendChild(mixedPot);
+        potContainer.appendChild(removeButton);
+        
+        // Add to the mixed pots container
+        mixedPotsContainer.appendChild(potContainer);
+        
+        // Track this pot for potential later operations
+        this.mixedPots.push(potContainer);
         
         return mixedPot;
     }

@@ -5,6 +5,8 @@ export default class MachineView {
         this.activeMixingAnimations = new Map();
         // Track which machines have completed mixing to avoid duplicates
         this.completedMixings = new Set();
+        // Track absolute start times of animations to properly handle hall switching
+        this.animationStartTimes = new Map();
     }
 
     drawMixingMachines(mixingMachines) {
@@ -32,6 +34,9 @@ export default class MachineView {
         // Clear existing machines
         container.innerHTML = "";
 
+        // Get hall index for animation tracking
+        const hallIndex = this.controller.activeHallIndex;
+
         // Create each machine in vertical layout
         mixingMachines.forEach((machine, index) => {
             const machineDiv = document.createElement("div");
@@ -57,27 +62,21 @@ export default class MachineView {
             dropZone.className = "machine-drop-zone";
             dropZone.id = `machine-drop-zone-${index}`;
             
-            // Get hall index for animation tracking
-            const hallIndex = this.controller.activeHallIndex;
             const machineKey = `hall${hallIndex}-machine${index}`;
             
             // If the machine already has pot contents from the model, show them
-            if (machine.pot_contents && machine.pot_contents.length > 0 && machine.status !== "finished") {
+            if (machine.pot_contents && machine.pot_contents.length > 0) {
                 // Create the pot visual
                 const potClone = document.createElement("div");
                 potClone.className = "mixing-pot-in-machine";
                 
                 // Check machine status
                 if (machine.status === "mixing") {
-                    // Check if this machine has already been processed
-                    const existingAnimation = this.activeMixingAnimations.get(machineKey);
-                    if (existingAnimation) {
-                        // If we have an animation in progress, restore it
-                        this.renderMixingInProgress(potClone, machine, machineKey, existingAnimation);
-                    } else {
-                        // Otherwise just render the ingredients
-                        this.renderPotIngredients(potClone, machine.pot_contents);
-                    }
+                    // Render the currently mixing pot with appropriate timing
+                    this.renderMixingInProgress(potClone, machine, machineKey);
+                } else if (machine.status === "finished") {
+                    // Render finished state
+                    this.renderFinishedMixing(potClone, machine);
                 } else {
                     // Just render ingredients for non-mixing machines
                     this.renderPotIngredients(potClone, machine.pot_contents);
@@ -94,11 +93,6 @@ export default class MachineView {
                     this.controller.isAnyMachineMixing(this.controller.getActiveMixingHall())) {
                     dropZone.classList.add("disabled-drop-zone");
                     dropZone.textContent = "Te warm! Niet beschikbaar";
-                    
-                    // Modify the styling of disabled drop zones
-                    dropZone.style.backgroundColor = "rgba(255, 0, 0, 0.1)";
-                    dropZone.style.borderColor = "#ffaaaa";
-                    dropZone.style.color = "#ff5555";
                 }
             }
             
@@ -170,8 +164,23 @@ export default class MachineView {
         });
     }
 
+    // Render a finished mixed pot
+    renderFinishedMixing(potElement, machine) {
+        // Calculate the mixed color
+        const mixedColor = this.calculateMixedColor(machine.pot_contents);
+        
+        // Set the pot's background color to the mixed color
+        potElement.style.backgroundColor = mixedColor;
+        
+        // Add a label indicating it's finished
+        const finishedLabel = document.createElement('div');
+        finishedLabel.className = 'finished-mixing-label';
+        finishedLabel.textContent = 'Klaar!';
+        potElement.appendChild(finishedLabel);
+    }
+
     // Render a pot that is currently mixing (with progress bar)
-    renderMixingInProgress(potElement, machine, machineKey, existingAnimation) {
+    renderMixingInProgress(potElement, machine, machineKey) {
         // Create a container for the ingredients (they'll be hidden during mixing)
         const ingredientsContainer = document.createElement('div');
         ingredientsContainer.className = 'ingredients-container';
@@ -190,14 +199,6 @@ export default class MachineView {
         // Create time info display
         const timeInfoContainer = document.createElement('div');
         timeInfoContainer.className = 'time-info-container';
-        timeInfoContainer.style.position = 'absolute';
-        timeInfoContainer.style.top = '5px';
-        timeInfoContainer.style.left = '5px';
-        timeInfoContainer.style.fontSize = '10px';
-        timeInfoContainer.style.color = 'white';
-        timeInfoContainer.style.background = 'rgba(0,0,0,0.5)';
-        timeInfoContainer.style.padding = '2px 4px';
-        timeInfoContainer.style.borderRadius = '3px';
         
         // Add mixing time display
         if (machine.mixingTime) {
@@ -228,35 +229,60 @@ export default class MachineView {
         
         potElement.appendChild(timeInfoContainer);
         
-        // Update the progress bar to show current progress
-        if (existingAnimation) {
-            const elapsedTime = Date.now() - existingAnimation.startTime;
-            const progress = Math.min(100, (elapsedTime / existingAnimation.duration) * 100);
-            progressBar.style.height = `${progress}%`;
-        } else {
-            progressBar.style.height = '0%'; // Start at 0%
-        }
+        // Get the animation start time from our storage or use current time as fallback
+        const startTime = this.animationStartTimes.get(machineKey) || Date.now();
+        const duration = machine.mixingTime; // Use the machine's mixing time
         
+        // Calculate current progress based on elapsed time
+        const elapsedTime = Date.now() - startTime;
+        const progress = Math.min(100, (elapsedTime / duration) * 100);
+        
+        // Update the progress bar to show current progress
+        progressBar.style.height = `${progress}%`;
+        
+        // Add the progress bar to the container
         progressBarContainer.appendChild(progressBar);
         potElement.appendChild(progressBarContainer);
         
-        // Don't restart animation if it's already in progress
-        if (existingAnimation && !this.completedMixings.has(machineKey)) {
-            // Continue the animation from current point if not completed
-            const elapsedTime = Date.now() - existingAnimation.startTime;
-            const remainingTime = Math.max(0, existingAnimation.duration - elapsedTime);
+        // Add mixing animation class to pot
+        potElement.classList.add('mixing-in-progress');
+        
+        // If we haven't completed mixing yet and there's still time left, continue animation
+        if (!this.completedMixings.has(machineKey) && progress < 100) {
+            const remainingTime = duration - elapsedTime;
             
             if (remainingTime > 0) {
+                // Continue the animation with remaining time
                 this.animateMixingProgress(
                     progressBar, 
                     remainingTime, 
                     machineKey, 
                     potElement, 
-                    machine, 
-                    existingAnimation.startTime
+                    machine,
+                    startTime
                 );
+            } else {
+                // If time has expired but we haven't marked it complete yet, complete it now
+                this.completeMixing(machine, machineKey);
             }
         }
+    }
+
+    // Method to complete mixing process
+    completeMixing(machine, machineKey) {
+        // Mark this machine as completed
+        this.completedMixings.add(machineKey);
+        
+        // Animation complete
+        machine.status = "finished";
+        
+        // Clean up animation reference
+        this.activeMixingAnimations.delete(machineKey);
+        
+        // We keep the start time in case we need to reference when this completed
+        
+        // Create a mixed pot and add to button area - only once
+        this.addMixedPotToButtonView(machine, machineKey);
     }
 
     // Calculate the mixed color from all ingredients using proper HSL mixing
@@ -388,20 +414,28 @@ export default class MachineView {
     }
 
     // Animate the mixing progress bar
-    animateMixingProgress(progressBar, duration, machineKey, potElement, machine, initialStartTime) {
-        // Use provided start time or create a new one
-        const startTime = initialStartTime || Date.now();
+    animateMixingProgress(progressBar, duration, machineKey, potElement, machine, startTime) {
+        // Reset the completed flag for this machine to ensure proper animation
+        this.completedMixings.delete(machineKey);
+        
+        // Store the absolute start time for consistent timing across hall switches
+        if (!this.animationStartTimes.has(machineKey)) {
+            this.animationStartTimes.set(machineKey, startTime);
+        }
         
         // Store animation info for potential redraw
         this.activeMixingAnimations.set(machineKey, {
-            startTime,
-            duration: duration + (Date.now() - startTime), // Adjust for elapsed time
+            startTime: this.animationStartTimes.get(machineKey),
+            duration: machine.mixingTime, // Always use the full duration from machine
             potElement,
             machine
         });
         
         // Mark machine as mixing
         machine.status = "mixing";
+        
+        // Add the mixing animation class to the pot element
+        potElement.classList.add('mixing-in-progress');
         
         // Create animation function
         const animate = () => {
@@ -410,28 +444,28 @@ export default class MachineView {
                 return; // Skip animation if already completed
             }
             
+            // Calculate progress based on the original start time
             const currentTime = Date.now();
-            const elapsedTime = currentTime - startTime;
-            const progress = Math.min(100, (elapsedTime / duration) * 100);
+            const totalElapsedTime = currentTime - this.animationStartTimes.get(machineKey);
+            const totalDuration = machine.mixingTime;
+            const progress = Math.min(100, (totalElapsedTime / totalDuration) * 100);
             
-            // Update progress bar height
-            progressBar.style.height = `${progress}%`;
+            // Update progress bar height if it exists
+            if (progressBar && progressBar.style) {
+                progressBar.style.height = `${progress}%`;
+            }
             
             if (progress < 100) {
                 // Continue animation
                 requestAnimationFrame(animate);
             } else {
-                // Mark this machine as completed
-                this.completedMixings.add(machineKey);
+                // Complete the mixing process
+                this.completeMixing(machine, machineKey);
                 
-                // Animation complete
-                machine.status = "finished";
-                
-                // Clean up animation reference
-                this.activeMixingAnimations.delete(machineKey);
-                
-                // Create a mixed pot and add to button area - only once
-                this.addMixedPotToButtonView(machine, machineKey);
+                // Remove mixing animation class
+                if (potElement) {
+                    potElement.classList.remove('mixing-in-progress');
+                }
             }
         };
         
@@ -443,8 +477,6 @@ export default class MachineView {
 
     // Create a new finished pot in the button area and clear the machine
     addMixedPotToButtonView(machine, machineKey) {
-        console.log(`Gemengde pot maken voor ${machineKey}`);
-        
         // Only proceed if the machine has contents
         if (!machine.pot_contents || machine.pot_contents.length === 0) {
             console.warn(`Geen inhoud om te mengen voor ${machineKey}`);
@@ -476,6 +508,9 @@ export default class MachineView {
                 hall.mixMachines[machineIndex].mixingTime = 0;
                 hall.mixMachines[machineIndex].status = "empty";
                 
+                // Remove the animation start time
+                this.animationStartTimes.delete(machineKey);
+                
                 // If this is the active hall, redraw it
                 if (hallIndex === this.controller.activeHallIndex) {
                     this.drawMixingMachines(hall.mixMachines);
@@ -494,7 +529,9 @@ export default class MachineView {
     }
 
     handlePotDrop(potIndex, machineIndex, dropZone) {
-        console.log(`Pot ${potIndex} geplaatst in Machine ${machineIndex}`);
+        // Get the active hall index for tracking
+        const activeHallIndex = this.controller.activeHallIndex;
+        const machineKey = `hall${activeHallIndex}-machine${machineIndex}`;
         
         // Get the original pot element
         const originalPot = document.querySelector(`#mixingPotsContainer .mixing-pot-container > [data-index="${potIndex}"]`);
@@ -515,7 +552,6 @@ export default class MachineView {
         
         // Get the active hall
         const activeHall = this.controller.getActiveMixingHall();
-        const activeHallIndex = this.controller.activeHallIndex;
         
         // Get the pot ingredients from the machine model
         const machine = activeHall.mixMachines[machineIndex];
@@ -542,9 +578,6 @@ export default class MachineView {
         // Important: Redraw the mixing pots to update indexes
         this.controller.view.drawMixingPots(this.controller.mixingPots);
         
-        // Create unique machine key for animation tracking
-        const machineKey = `hall${activeHallIndex}-machine${machineIndex}`;
-        
         // Create a container for ingredients (they'll be visible but faded during mixing)
         const ingredientsContainer = document.createElement('div');
         ingredientsContainer.className = 'ingredients-container';
@@ -567,14 +600,6 @@ export default class MachineView {
         // Create mixing time info display with weather adjustments
         const timeInfoContainer = document.createElement('div');
         timeInfoContainer.className = 'time-info-container';
-        timeInfoContainer.style.position = 'absolute';
-        timeInfoContainer.style.top = '5px';
-        timeInfoContainer.style.left = '5px';
-        timeInfoContainer.style.fontSize = '10px';
-        timeInfoContainer.style.color = 'white';
-        timeInfoContainer.style.background = 'rgba(0,0,0,0.5)';
-        timeInfoContainer.style.padding = '2px 4px';
-        timeInfoContainer.style.borderRadius = '3px';
         
         // Display the adjusted mixing time
         timeInfoContainer.textContent = `Tijd: ${machine.mixingTime}ms`;
@@ -603,10 +628,19 @@ export default class MachineView {
         
         potClone.appendChild(timeInfoContainer);
         
-        // Start mixing animation
-        // Use the adjusted mixing time coming from the controller
+        // Add mixing animation class to pot
+        potClone.classList.add('mixing-in-progress');
+        
+        // Store the start time for this mixing operation
+        const startTime = Date.now();
+        this.animationStartTimes.set(machineKey, startTime);
+        
+        // Clear any existing animation state for this machine
+        this.completedMixings.delete(machineKey);
+        
+        // Start mixing animation with the full duration
         const animationDuration = Math.min(30000, machine.mixingTime); // Cap at 30 seconds max for UX
-        this.animateMixingProgress(progressBar, animationDuration, machineKey, potClone, machine);
+        this.animateMixingProgress(progressBar, animationDuration, machineKey, potClone, machine, startTime);
         
         // If high temperature restriction is active, redraw all machines to disable others
         if (this.controller.isHighTemperatureRestrictionActive()) {
@@ -644,6 +678,9 @@ export default class MachineView {
         
         // Remove from completed set if it exists
         this.completedMixings.delete(machineKey);
+        
+        // Remove the animation start time
+        this.animationStartTimes.delete(machineKey);
         
         // Remove the machine from the active hall using the controller method
         this.controller.removeMixingMachine(index);

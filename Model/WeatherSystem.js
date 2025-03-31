@@ -6,7 +6,7 @@ export default class WeatherSystem {
         this.currentWeather = null;
         this.currentTemperature = null;
         this.isPrecipitation = false;
-        this.cityName = "London"; // Default city
+        this.cityName = "Halifax"; // Default city
         
         // Start with initial weather fetch
         this.fetchWeatherData().catch(error => {
@@ -31,9 +31,21 @@ export default class WeatherSystem {
         return this.isPrecipitation;
     }
 
+    // Get the current city name
+    getCity() {
+        return this.cityName;
+    }
+
     // Set the city to get weather for
     setCity(cityName) {
-        this.cityName = cityName;
+        if (!cityName || cityName.trim() === '') {
+            return Promise.reject(new Error('City name cannot be empty'));
+        }
+        
+        // Trim and store the new city name
+        this.cityName = cityName.trim();
+        
+        // Return a promise so we can handle the result
         return this.fetchWeatherData();
     }
 
@@ -84,7 +96,7 @@ export default class WeatherSystem {
                     lon: data[0].lon
                 };
             } else {
-                throw new Error('City not found');
+                throw new Error(`City not found: ${this.cityName}`);
             }
         } catch (error) {
             console.error('Error getting city coordinates:', error);
@@ -122,7 +134,8 @@ export default class WeatherSystem {
                 return {
                     status: this.getWeatherStatus(),
                     temperature: this.currentTemperature,
-                    isPrecipitation: this.isPrecipitation
+                    isPrecipitation: this.isPrecipitation,
+                    city: this.cityName
                 };
             } else {
                 throw new Error('Weather data not available');
