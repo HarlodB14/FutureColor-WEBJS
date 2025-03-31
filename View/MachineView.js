@@ -155,10 +155,6 @@ export default class MachineView {
             }
             
             ingredientDiv.style.backgroundColor = ingredient.color;
-            
-            // Set size based on structure
-            this.setSizeBasedOnStructure(ingredientDiv, structureClass);
-            
             ingredientDiv.textContent = this.getStructureText(ingredient.structure);
             potElement.appendChild(ingredientDiv);
         });
@@ -210,8 +206,7 @@ export default class MachineView {
             
             if (precipitation || temperature < 10) {
                 const timeInfoNote = document.createElement('div');
-                timeInfoNote.style.fontSize = '8px';
-                timeInfoNote.style.fontStyle = 'italic';
+                timeInfoNote.className = 'time-info-note';
                 
                 let adjustmentText = '';
                 if (precipitation && temperature < 10) {
@@ -610,8 +605,7 @@ export default class MachineView {
         
         if (precipitation || temperature < 10) {
             const timeInfoNote = document.createElement('div');
-            timeInfoNote.style.fontSize = '8px';
-            timeInfoNote.style.fontStyle = 'italic';
+            timeInfoNote.className = 'time-info-note';
             
             let adjustmentText = '';
             if (precipitation && temperature < 10) {
@@ -645,23 +639,6 @@ export default class MachineView {
         // If high temperature restriction is active, redraw all machines to disable others
         if (this.controller.isHighTemperatureRestrictionActive()) {
             this.drawMixingMachines(activeHall.mixMachines);
-        }
-    }
-    
-    // Helper method to set ingredient size based on structure
-    setSizeBasedOnStructure(element, structureClass) {
-        if (structureClass === 'grain') {
-            element.style.width = '15px';
-            element.style.height = '15px';
-        } else if (structureClass === 'rough-grain') {
-            element.style.width = '25px';
-            element.style.height = '25px';
-        } else if (structureClass === 'smooth') {
-            element.style.width = '20px';
-            element.style.height = '20px';
-        } else if (structureClass === 'slimey') {
-            element.style.width = '25px';
-            element.style.height = '15px';
         }
     }
     

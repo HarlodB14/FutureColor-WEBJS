@@ -254,8 +254,7 @@ export default class MixingHallView {
         // Create the switch button
         const switchButton = document.createElement('button');
         switchButton.textContent = 'Wissel Menghal';
-        switchButton.className = 'action-button';
-        switchButton.style.width = '180px'; // This one style is kept inline as it's specific to this button
+        switchButton.className = 'action-button hall-switcher-button';
         switchButton.addEventListener('click', () => {
             const newIndex = this.controller.switchMixingHall();
             hallIndicator.textContent = `Menghal #${newIndex + 1}`;

@@ -124,9 +124,6 @@ export default class ButtonView {
         // Create a container for the mixed pot and its remove button
         const potContainer = document.createElement("div");
         potContainer.className = "mixing-pot-container";
-        potContainer.style.position = "relative";
-        potContainer.style.display = "inline-block";
-        potContainer.style.margin = "5px";
         
         // Create mixed pot element
         const mixedPot = document.createElement("div");
@@ -142,12 +139,12 @@ export default class ButtonView {
             e.dataTransfer.effectAllowed = 'copy';
             
             // Add a visual indicator for dragging
-            mixedPot.style.opacity = '0.6';
+            mixedPot.classList.add('dragging');
         });
         
         mixedPot.addEventListener('dragend', () => {
             // Reset visual style
-            mixedPot.style.opacity = '1';
+            mixedPot.classList.remove('dragging');
         });
         
         // Add label to show the HSL value
@@ -160,7 +157,6 @@ export default class ButtonView {
         const removeButton = document.createElement("button");
         removeButton.className = "remove-button pot-remove-button";
         removeButton.textContent = "X";
-        removeButton.style.zIndex = "100";
         
         // Add click event to remove this mixed pot
         removeButton.addEventListener("click", () => {

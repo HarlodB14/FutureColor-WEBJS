@@ -132,7 +132,7 @@ export default class IngredientView {
             // Add specific class based on structure
             ingredientDiv.classList.add(this.getStructureClass(ingredient.structure));
             
-            // Set background color
+            // Set background color - kept as inline style since it's dynamic content
             ingredientDiv.style.backgroundColor = ingredient.color;
             ingredientDiv.style.lineHeight = this.getLineHeight(ingredient.structure);
             
@@ -240,18 +240,6 @@ export default class IngredientView {
         // Log for debugging
         console.log(`Bijwerken van pot ${potIndex} inhoud:`, contents);
 
-        // Set dimensions
-        const maxPerRow = 3;
-        const spacing = 4;
-        const ingredientSize = 30; // Adjust based on your design
-
-        // Calculate pot height
-        const numRows = Math.ceil(contents.length / maxPerRow);
-        const potHeight = numRows * (ingredientSize + spacing) + 20; // Adding padding
-
-        // Adjust pot size
-        potDiv.style.height = `${Math.max(100, potHeight)}px`; // Minimum height of 100px
-        
         // Update pot's mixing speed attribute from first ingredient (if exists)
         if (contents.length > 0) {
             potDiv.setAttribute('data-mixing-speed', contents[0].mixingSpeed);
@@ -273,11 +261,8 @@ export default class IngredientView {
             ingredientDiv.className = 'ingredient';
             ingredientDiv.classList.add(this.getStructureClass(ingredient.structure));
             
-            // Set styles not in CSS
-            ingredientDiv.style.width = `${ingredientSize}px`;
-            ingredientDiv.style.height = `${ingredientSize}px`;
+            // Only set the background color as inline style since it's dynamic
             ingredientDiv.style.backgroundColor = ingredient.color;
-            ingredientDiv.style.margin = `${spacing / 2}px`;
             
             ingredientDiv.innerText = this.getStructureText(ingredient.structure);
             ingredientDiv.setAttribute('data-mixing-speed', ingredient.mixingSpeed);
