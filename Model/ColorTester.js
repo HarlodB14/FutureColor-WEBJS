@@ -171,10 +171,10 @@ export default class ColorTester {
                     cell.style.backgroundColor = this.grid[i][j]; // This is acceptable as it's dynamic content
                     
                     // Add click handler to show color info for existing colors
-                    cell.onclick = () => {
+                    cell.onclick = (e) => {
                         const colorObj = this.parseHslColor(this.grid[i][j]);
                         if (colorObj) {
-                            this.showColorInfo(colorObj, cell);
+                            this.showColorInfo(colorObj, cell, e);
                         }
                     };
                 }
@@ -203,11 +203,11 @@ export default class ColorTester {
                         cell.style.backgroundColor = color; // Dynamic content, acceptable inline style
                         
                         // Add click handler to show color info
-                        cell.onclick = () => {
+                        cell.onclick = (e) => {
                             // Parse the HSL color
                             const colorObj = this.parseHslColor(color);
                             if (colorObj) {
-                                this.showColorInfo(colorObj, cell);
+                                this.showColorInfo(colorObj, cell, e);
                             }
                         };
                     }
@@ -220,13 +220,13 @@ export default class ColorTester {
         container.appendChild(gridContainer);
     }
     
-    showColorInfo(color, element) {
+    showColorInfo(color, element, event) {
         // Create or get color info modal
         let colorModal = document.getElementById('colorInfoModal');
         if (!colorModal) {
             colorModal = document.createElement('div');
             colorModal.id = 'colorInfoModal';
-            colorModal.className = 'color-info-modal color-info-modal-fixed';
+            colorModal.className = 'color-info-modal';
             
             document.body.appendChild(colorModal);
         }
@@ -312,14 +312,33 @@ export default class ColorTester {
         
         colorModal.appendChild(triadContainer);
         
-        // Calculate position based on element location (but let CSS handle the fixed positioning)
+        // Calculate position above the clicked element
         const rect = element.getBoundingClientRect();
         
-        // Set the modal's position relative to the grid cell
-        const leftPosition = Math.max(10, Math.min(window.innerWidth - 300, rect.left));
-        colorModal.setAttribute('data-left', leftPosition);
+        // Position the modal above the clicked element
+        const modalHeight = 280; // Estimated modal height, adjust as needed
+        let topPosition = rect.top - modalHeight - 10; // 10px gap
+        
+        // If there's not enough space above, position it below
+        if (topPosition < 0) {
+            topPosition = rect.bottom + 10; // 10px gap
+        }
+        
+        // Center horizontally above/below the cell
+        const leftPosition = rect.left + (rect.width / 2) - 125; // Assuming modal width is ~250px
+        
+        // Apply the position
+        colorModal.style.position = 'fixed';
+        colorModal.style.top = `${topPosition}px`;
+        colorModal.style.left = `${Math.max(10, Math.min(window.innerWidth - 260, leftPosition))}px`;
+        colorModal.style.zIndex = '9999';
         
         // Show the modal
         colorModal.style.display = 'block';
+        
+        // Prevent clicks from propagating to elements below the modal
+        colorModal.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
     }
 }

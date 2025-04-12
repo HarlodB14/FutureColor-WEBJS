@@ -902,3 +902,63 @@ input[type="color"]::-moz-color-swatch {
     padding: 5px;
   }
 }
+
+/* ============ COLOR INFO MODAL ============ */
+.color-info-modal {
+  display: none;
+  background-color: white;
+  padding: 15px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-md);
+  width: 250px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.color-swatch {
+  width: 100%;
+  height: 50px;
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+
+.triad-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.triad-color-block {
+  text-align: center;
+  width: 30%;
+}
+
+.triad-original-color {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-sm);
+  z-index: 1;
+}
+
+.triad-swatch {
+  height: 30px;
+  border: 1px solid var(--border);
+  margin-bottom: 5px;
+}
+
+.triad-label, .triad-hsl-text {
+  font-size: 12px;
+}
+
+.triad-hsl-text {
+  font-size: 10px;
+}
